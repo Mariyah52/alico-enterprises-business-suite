@@ -1,0 +1,1548 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0">
+<meta name="apple-mobile-web-app-capable" content="yes">
+<meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
+<meta name="apple-mobile-web-app-title" content="ALICO">
+<title>ALICO ENTERPRISES — Business Suite</title>
+<!-- FIX #1: No Google Fonts — system fonts only, works offline -->
+<style>
+@media print {
+  * { -webkit-print-color-adjust: exact !important; color-adjust: exact !important; print-color-adjust: exact !important; }
+  body { font-size: 12pt; }
+
+  body > *:not(#printPortal){ display:none!important; }
+  #printPortal{ display:block!important; position:static!important; }
+  .no-print{ display:none!important; }
+}
+#printPortal{ display:none; }
+
+:root{
+  --navy:#1B2A4A; --navy2:#243660; --red:#C0392B;
+  --gold:#E67E22; --green:#27AE60; --bg:#EEF1F7;
+  --white:#fff; --border:#D5DCE8; --text:#1B2A4A;
+  --muted:#6B7A99; --light:#F7F9FC;
+  --shadow:0 2px 12px rgba(27,42,74,.10);
+  --shadow-lg:0 8px 32px rgba(27,42,74,.18);
+  /* FIX #1: System font stack — no internet needed */
+  --font: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, Helvetica, Arial, sans-serif;
+  --font-head: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, Helvetica, Arial, sans-serif;
+}
+*{ box-sizing:border-box; margin:0; padding:0; -webkit-tap-highlight-color:transparent; }
+body{ font-family:var(--font); background:var(--bg); color:var(--text); min-height:100vh; overflow-x:hidden; }
+
+/* sync bar */
+.sync-bar{ height:3px; background:var(--border); position:fixed; top:0; left:0; right:0; z-index:999; }
+.sync-fill{ height:100%; width:0; transition:width .4s; background:var(--green); }
+.sync-fill.syncing{ width:60%; background:var(--gold); }
+.sync-fill.done{ width:100%; background:var(--green); }
+.sync-fill.error{ width:100%; background:var(--red); }
+
+/* status dot */
+.dot{ width:8px; height:8px; border-radius:50%; display:inline-block; margin-right:4px; }
+.dot.online{ background:#2ECC71; }
+.dot.offline{ background:#E74C3C; }
+
+/* navbar */
+.navbar{ background:var(--navy); position:sticky; top:3px; z-index:200; box-shadow:0 2px 16px rgba(0,0,0,.25); }
+.nb-top{ display:flex; align-items:center; justify-content:space-between; padding:10px 16px; }
+.logo-wrap{ display:flex; align-items:center; gap:10px; }
+.logo-text{ color:#fff; font-size:18px; font-weight:800; letter-spacing:1.5px; line-height:1; }
+.logo-sub{ color:rgba(255,255,255,.55); font-size:9px; letter-spacing:1px; margin-top:1px; }
+.nb-right{ display:flex; align-items:center; gap:10px; }
+.nb-status{ font-size:10px; color:rgba(255,255,255,.7); display:flex; align-items:center; }
+.nav-tabs{ display:flex; overflow-x:auto; padding:0 8px 8px; gap:4px; scrollbar-width:none; }
+.nav-tabs::-webkit-scrollbar{ display:none; }
+.nav-tab{ flex-shrink:0; padding:7px 13px; border-radius:20px; border:none; cursor:pointer; font-size:12px; font-weight:700; font-family:var(--font); background:rgba(255,255,255,.08); color:rgba(255,255,255,.65); transition:all .18s; white-space:nowrap; }
+.nav-tab.active{ background:var(--red); color:#fff; }
+.nav-tab:active{ transform:scale(.96); }
+
+/* login */
+.login-wrap{ min-height:100vh; display:flex; align-items:center; justify-content:center; background:var(--navy); padding:20px; }
+.login-card{ background:#fff; border-radius:20px; padding:36px 28px; width:100%; max-width:400px; box-shadow:var(--shadow-lg); text-align:center; }
+.login-title{ font-size:26px; font-weight:800; color:var(--navy); letter-spacing:1px; margin-bottom:4px; }
+.login-sub{ font-size:12px; color:var(--muted); margin-bottom:24px; }
+.divider{ display:flex; align-items:center; gap:10px; margin:14px 0; color:var(--muted); font-size:12px; }
+.divider::before,.divider::after{ content:''; flex:1; height:1px; background:var(--border); }
+
+/* wizard */
+.wizard{ max-width:640px; margin:40px auto; padding:16px; }
+.wiz-card{ background:#fff; border-radius:16px; padding:28px; box-shadow:var(--shadow); }
+.wiz-title{ font-size:20px; font-weight:800; color:var(--navy); margin-bottom:6px; }
+.wiz-sub{ font-size:13px; color:var(--muted); margin-bottom:20px; }
+.step-row{ display:flex; align-items:flex-start; gap:10px; margin-bottom:14px; padding:14px; background:var(--light); border-radius:10px; }
+.step-num{ background:var(--red); color:#fff; width:28px; height:28px; border-radius:50%; display:inline-flex; align-items:center; justify-content:center; font-weight:800; font-size:13px; flex-shrink:0; }
+.step-label{ font-weight:700; font-size:13px; color:var(--navy); margin-bottom:3px; }
+.step-detail{ font-size:12px; color:var(--muted); line-height:1.6; }
+
+/* layout */
+.page{ padding:16px; max-width:1100px; margin:0 auto; }
+.ph{ display:flex; align-items:center; justify-content:space-between; margin-bottom:18px; flex-wrap:wrap; gap:10px; }
+.pt{ font-size:22px; font-weight:800; color:var(--navy); letter-spacing:.5px; }
+.ps{ font-size:12px; color:var(--muted); margin-top:2px; }
+.card{ background:var(--white); border-radius:14px; padding:18px; box-shadow:var(--shadow); margin-bottom:14px; }
+.ct{ font-size:14px; font-weight:700; color:var(--navy); margin-bottom:14px; display:flex; align-items:center; gap:7px; }
+.g2{ display:grid; grid-template-columns:1fr 1fr; gap:12px; }
+.g4{ display:grid; grid-template-columns:repeat(4,1fr); gap:12px; }
+@media(max-width:700px){ .g4{ grid-template-columns:1fr 1fr; } }
+@media(max-width:480px){ .g2{ grid-template-columns:1fr; } }
+
+.stat{ border-radius:14px; padding:18px 14px; color:#fff; text-align:center; }
+.sn{ font-size:24px; font-weight:800; line-height:1; }
+.sl{ font-size:10px; opacity:.85; margin-top:4px; letter-spacing:.6px; font-weight:700; text-transform:uppercase; }
+
+.btn{ display:inline-flex; align-items:center; gap:5px; border:none; border-radius:9px; cursor:pointer; font-weight:700; font-family:var(--font); letter-spacing:.3px; transition:all .15s; white-space:nowrap; }
+.btn:active{ transform:scale(.97); }
+.bp{ background:var(--navy); color:#fff; padding:10px 18px; font-size:13px; }
+.bp:hover{ background:var(--navy2); }
+.bo{ background:transparent; color:var(--navy); border:1.5px solid var(--border); padding:8px 14px; font-size:12px; }
+.bg{ background:var(--light); color:var(--muted); padding:8px 14px; font-size:12px; }
+.bd{ background:#F8D7DA; color:#721C24; padding:8px 12px; font-size:12px; }
+.bs{ padding:6px 11px!important; font-size:11px!important; border-radius:7px; }
+.bl{ padding:12px 22px!important; font-size:14px!important; }
+
+.fld{ margin-bottom:12px; }
+.lbl{ display:block; font-size:10px; font-weight:700; color:var(--muted); margin-bottom:4px; letter-spacing:.6px; text-transform:uppercase; }
+.inp{ width:100%; padding:10px 12px; border:1.5px solid var(--border); border-radius:9px; font-size:13px; color:var(--text); background:#fff; font-family:var(--font); outline:none; transition:border-color .15s; }
+.inp:focus{ border-color:var(--navy); }
+.inp.invalid{ border-color:var(--red)!important; background:#FFF5F5; }
+select.inp{ cursor:pointer; }
+textarea.inp{ min-height:70px; resize:vertical; }
+.err{ color:var(--red); font-size:11px; margin-top:3px; display:none; }
+.err.show{ display:block; }
+
+.tw{ overflow-x:auto; -webkit-overflow-scrolling:touch; }
+table{ width:100%; border-collapse:collapse; font-size:13px; }
+thead tr{ background:var(--navy); }
+th{ color:#fff; padding:10px 12px; text-align:left; font-size:10px; font-weight:700; letter-spacing:.6px; white-space:nowrap; }
+td{ padding:10px 12px; border-bottom:1px solid var(--border); color:var(--text); vertical-align:middle; }
+tbody tr:last-child td{ border-bottom:none; }
+tbody tr:hover{ background:var(--light); }
+
+.bdg{ display:inline-block; padding:3px 10px; border-radius:20px; font-size:10px; font-weight:700; letter-spacing:.4px; }
+.bg-green{ background:#D4EDDA; color:#155724; }
+.bg-red{ background:#F8D7DA; color:#721C24; }
+.bg-yellow{ background:#FFF3CD; color:#856404; }
+.bg-blue{ background:#D1ECF1; color:#0C5460; }
+.bg-gray{ background:#E2E8F0; color:#4A5568; }
+
+.modal-bg{ position:fixed; inset:0; background:rgba(0,0,0,.55); z-index:500; display:flex; align-items:flex-start; justify-content:center; padding:12px; overflow-y:auto; -webkit-overflow-scrolling:touch; }
+.modal{ background:var(--white); border-radius:18px; padding:22px; width:100%; max-width:920px; box-shadow:var(--shadow-lg); margin:auto; }
+.mh{ display:flex; justify-content:space-between; align-items:center; margin-bottom:18px; padding-bottom:14px; border-bottom:2px solid var(--border); }
+.mt{ font-size:18px; font-weight:800; color:var(--navy); }
+
+.totbox{ background:var(--light); border-radius:10px; padding:14px 16px; min-width:260px; }
+.totr{ display:flex; justify-content:space-between; font-size:13px; color:var(--muted); margin-bottom:6px; }
+.tott{ display:flex; justify-content:space-between; font-weight:800; font-size:16px; color:#fff; background:var(--navy); padding:10px 14px; border-radius:8px; margin-top:8px; }
+
+.cbox{ background:#EEF4FF; border-radius:10px; padding:14px; margin-bottom:14px; }
+.chip{ display:inline-flex; align-items:center; gap:5px; padding:5px 12px; border-radius:20px; font-size:11px; font-weight:700; cursor:pointer; border:1.5px solid var(--border); background:#fff; color:var(--text); margin:3px; transition:all .15s; }
+.chip.on{ background:var(--navy); color:#fff; border-color:var(--navy); }
+
+.qg{ display:grid; grid-template-columns:1fr 1fr; gap:8px; }
+.qb{ background:var(--light); border:1.5px solid var(--border); border-radius:10px; padding:14px 10px; text-align:center; cursor:pointer; transition:all .15s; font-family:var(--font); color:var(--text); font-weight:700; font-size:12px; display:flex; flex-direction:column; align-items:center; gap:5px; }
+.qb:hover{ background:var(--navy); color:#fff; border-color:var(--navy); }
+.qi{ font-size:20px; }
+
+.toast{ position:fixed; bottom:24px; left:50%; transform:translateX(-50%); background:var(--navy); color:#fff; padding:12px 22px; border-radius:30px; font-size:13px; font-weight:700; z-index:9999; box-shadow:var(--shadow-lg); opacity:0; transition:opacity .3s; pointer-events:none; white-space:nowrap; }
+.toast.show{ opacity:1; }
+.ponote{ background:#FFF3E0; border:1px solid #FFB74D; border-radius:8px; padding:10px 14px; font-size:12px; color:#E65100; font-weight:700; margin-bottom:12px; }
+.empty{ text-align:center; padding:48px 20px; color:var(--muted); }
+.empty .ei{ font-size:40px; margin-bottom:10px; }
+.empty p{ font-size:14px; }
+
+/* FIX #4: Data warning banner */
+.data-warn{ background:#FFF3CD; border:1px solid #FFB74D; border-radius:8px; padding:10px 14px; font-size:11px; color:#856404; margin-bottom:12px; display:flex; align-items:center; gap:8px; }
+
+/* ── PRINT STYLES ── */
+/* FIX #2: Print centered on page */
+.ph-wrap{ border-bottom:3px solid var(--red); padding-bottom:14px; margin-bottom:18px; }
+.ph-row{ display:flex; justify-content:space-between; align-items:flex-start; }
+.ph-co{ font-size:22px; font-weight:800; color:var(--navy); letter-spacing:2px; }
+.ph-tag{ font-size:10px; color:var(--red); letter-spacing:1px; font-weight:700; margin-top:2px; }
+.ph-sub{ font-size:11px; color:var(--muted); font-weight:600; }
+.ph-badge{ background:var(--navy); color:#fff; padding:6px 18px; border-radius:8px; font-weight:800; font-size:14px; letter-spacing:1px; text-align:center; }
+.ph-info{ font-size:11px; color:var(--muted); margin-top:8px; display:flex; gap:18px; flex-wrap:wrap; }
+
+/* ── SIGNATURE SECTION ── */
+.sign-section{ margin-top:40px; }
+.sign-grid{ display:grid; grid-template-columns:1fr 1fr 1fr; gap:24px; }
+.sign-box{ text-align:center; }
+.sign-stamp-box{ border:2px dashed var(--border); border-radius:8px; height:80px; display:flex; align-items:center; justify-content:center; font-size:11px; color:var(--muted); margin-bottom:8px; background:#FAFAFA; }
+.sign-stamp-box.has-stamp{ border-color:var(--navy); border-style:solid; background:#fff; }
+.sign-line{ border-top:1.5px solid var(--navy); padding-top:8px; font-size:10px; color:var(--muted); font-weight:700; letter-spacing:.4px; }
+
+/* stamp upload */
+.stamp-upload-area{ border:2px dashed var(--border); border-radius:10px; padding:20px; text-align:center; cursor:pointer; transition:all .2s; background:var(--light); }
+.stamp-upload-area:hover{ border-color:var(--navy); background:#EEF4FF; }
+.stamp-preview{ max-height:100px; max-width:200px; object-fit:contain; margin:8px auto; display:block; border-radius:6px; }
+
+/* FIX #3: Challan items - red line then items right below */
+.challan-items-wrap{ margin-top:0; }
+</style>
+</head>
+<body>
+
+<div class="sync-bar"><div class="sync-fill" id="syncFill"></div></div>
+<div class="toast" id="toast" role="alert" aria-live="polite"></div>
+<div id="printPortal"></div>
+
+<!-- LOGIN -->
+<div id="loginScreen" class="login-wrap" style="display:none;">
+  <div class="login-card">
+    <div style="margin-bottom:16px;">
+      <svg width="52" height="52" viewBox="0 0 100 100"><rect x="5" y="22" width="44" height="33" fill="#1B2A4A" transform="rotate(-8 27 38)" rx="4"/><rect x="33" y="12" width="44" height="33" fill="#C0392B" transform="rotate(-8 55 28)" rx="4"/><rect x="20" y="44" width="36" height="26" fill="#E74C3C" transform="rotate(-8 38 57)" rx="4"/></svg>
+    </div>
+    <div class="login-title">ALICO ENTERPRISES</div>
+    <div class="login-sub">Sign in to continue</div>
+    <div class="fld"><label class="lbl">Email</label><input type="email" class="inp" id="liEmail" placeholder="your@email.com" autocomplete="email"></div>
+    <div class="fld"><label class="lbl">Password</label><input type="password" class="inp" id="liPass" placeholder="••••••••" autocomplete="current-password" onkeydown="if(event.key==='Enter')signInEmail()"></div>
+    <div class="err" id="liErr" style="margin-bottom:10px;display:none;text-align:center;"></div>
+    <button class="btn bp bl" style="width:100%;justify-content:center;margin-bottom:12px;" onclick="signInEmail()" id="liBtn">🔐 Sign In</button>
+    <div class="divider">or</div>
+    <button class="btn bo bl" style="width:100%;justify-content:center;" onclick="signInGoogle()">
+      <svg width="16" height="16" viewBox="0 0 24 24"><path fill="#4285F4" d="M22.56 12.25c0-.78-.07-1.53-.2-2.25H12v4.26h5.92c-.26 1.37-1.04 2.53-2.21 3.31v2.77h3.57c2.08-1.92 3.28-4.74 3.28-8.09z"/><path fill="#34A853" d="M12 23c2.97 0 5.46-.98 7.28-2.66l-3.57-2.77c-.98.66-2.23 1.06-3.71 1.06-2.86 0-5.29-1.93-6.16-4.53H2.18v2.84C3.99 20.53 7.7 23 12 23z"/><path fill="#FBBC05" d="M5.84 14.09c-.22-.66-.35-1.36-.35-2.09s.13-1.43.35-2.09V7.07H2.18C1.43 8.55 1 10.22 1 12s.43 3.45 1.18 4.93l2.85-2.22.81-.62z"/><path fill="#EA4335" d="M12 5.38c1.62 0 3.06.56 4.21 1.64l3.15-3.15C17.45 2.09 14.97 1 12 1 7.7 1 3.99 3.47 2.18 7.07l3.66 2.84c.87-2.6 3.3-4.53 6.16-4.53z"/></svg>
+      Sign in with Google
+    </button>
+    <p style="font-size:11px;color:var(--muted);margin-top:14px;">Data syncs across all devices in real-time</p>
+  </div>
+</div>
+
+<!-- SETUP WIZARD -->
+<div id="setupWiz" style="display:none;">
+  <div class="wizard">
+    <div class="wiz-card">
+      <div style="text-align:center;margin-bottom:20px;">
+        <svg width="52" height="52" viewBox="0 0 100 100"><rect x="5" y="22" width="44" height="33" fill="#1B2A4A" transform="rotate(-8 27 38)" rx="4"/><rect x="33" y="12" width="44" height="33" fill="#C0392B" transform="rotate(-8 55 28)" rx="4"/><rect x="20" y="44" width="36" height="26" fill="#E74C3C" transform="rotate(-8 38 57)" rx="4"/></svg>
+        <div class="wiz-title" style="margin-top:10px;">🔥 Connect Firebase — One-time Setup</div>
+        <div class="wiz-sub">5 minutes. Then works forever on any device.</div>
+      </div>
+      <div class="step-row"><span class="step-num">1</span><div><div class="step-label">Create Firebase Project</div><div class="step-detail">Go to <strong>console.firebase.google.com</strong> → Add Project → Name: <strong>alico-enterprises</strong> → Disable Analytics → Create Project</div></div></div>
+      <div class="step-row"><span class="step-num">2</span><div><div class="step-label">Add Web App + Copy Config</div><div class="step-detail">⚙️ Project Settings → Your Apps → &lt;/&gt; Web → Register as <strong>alico-web</strong> → Copy the <strong>firebaseConfig</strong> values below</div></div></div>
+      <div class="step-row"><span class="step-num">3</span><div><div class="step-label">Enable Firestore</div><div class="step-detail">Build → Firestore Database → Create Database → <strong>Test Mode</strong> → Region: <strong>asia-south1</strong> → Done</div></div></div>
+      <div class="step-row"><span class="step-num">4</span><div><div class="step-label">Enable Authentication</div><div class="step-detail">Build → Authentication → Get Started → Enable <strong>Email/Password</strong> and <strong>Google</strong> → Users tab → Add User → your email + password</div></div></div>
+      <div class="step-row"><span class="step-num">5</span><div><div class="step-label">Deploy on Netlify</div><div class="step-detail">Go to <strong>netlify.com</strong> → Deploys → Drag updated folder → Same link updates!</div></div></div>
+      <div style="background:var(--light);border-radius:10px;padding:16px;margin-bottom:14px;">
+        <div style="font-size:12px;font-weight:700;color:var(--navy);margin-bottom:12px;">Paste your Firebase Config values:</div>
+        <div class="g2">
+          <div class="fld"><label class="lbl">API Key *</label><input class="inp" id="c_apiKey" placeholder="AIzaSy..."></div>
+          <div class="fld"><label class="lbl">Auth Domain *</label><input class="inp" id="c_authDomain" placeholder="xxx.firebaseapp.com"></div>
+          <div class="fld"><label class="lbl">Project ID *</label><input class="inp" id="c_projectId" placeholder="alico-enterprises-xxx"></div>
+          <div class="fld"><label class="lbl">Storage Bucket</label><input class="inp" id="c_storageBucket" placeholder="xxx.appspot.com"></div>
+          <div class="fld"><label class="lbl">Messaging Sender ID</label><input class="inp" id="c_messagingSenderId" placeholder="123456789"></div>
+          <div class="fld"><label class="lbl">App ID</label><input class="inp" id="c_appId" placeholder="1:123:web:abc..."></div>
+        </div>
+        <button class="btn bp bl" style="width:100%;justify-content:center;" onclick="saveConfig()">🔥 Connect Firebase & Launch</button>
+        <div class="err" id="cfgErr" style="margin-top:8px;text-align:center;"></div>
+      </div>
+      <div style="text-align:center;">
+        <button class="btn bg bs" onclick="useDemo()">🧪 Demo Mode (offline only — no sync)</button>
+      </div>
+    </div>
+  </div>
+</div>
+
+<!-- MAIN NAV -->
+<nav class="navbar" id="mainNav" style="display:none;">
+  <div class="nb-top">
+    <div class="logo-wrap">
+      <svg width="36" height="36" viewBox="0 0 100 100"><rect x="5" y="22" width="44" height="33" fill="#1B2A4A" transform="rotate(-8 27 38)" rx="4"/><rect x="33" y="12" width="44" height="33" fill="#C0392B" transform="rotate(-8 55 28)" rx="4"/><rect x="20" y="44" width="36" height="26" fill="#E74C3C" transform="rotate(-8 38 57)" rx="4"/></svg>
+      <div>
+        <div class="logo-text">ALICO ENTERPRISES</div>
+        <div class="logo-sub">CUSTOMER SATISFACTION IS OUR MOTTO</div>
+      </div>
+    </div>
+    <div class="nb-right">
+      <div class="nb-status"><span class="dot online" id="sDot"></span><span id="sTxt">Online</span></div>
+      <button class="btn bg bs" onclick="doSignOut()" style="color:rgba(255,255,255,.7);background:rgba(255,255,255,.1);">Sign Out</button>
+    </div>
+  </div>
+  <div class="nav-tabs" id="navTabs"></div>
+</nav>
+
+<main id="app" style="display:none;"></main>
+
+<!-- FIREBASE SDK -->
+<script type="module">
+import { initializeApp } from "https://www.gstatic.com/firebasejs/10.12.0/firebase-app.js";
+import { getFirestore, collection, doc, setDoc, deleteDoc, onSnapshot, enableIndexedDbPersistence, query, orderBy } from "https://www.gstatic.com/firebasejs/10.12.0/firebase-firestore.js";
+import { getAuth, signInWithEmailAndPassword, signInWithPopup, GoogleAuthProvider, onAuthStateChanged, signOut as fbOut } from "https://www.gstatic.com/firebasejs/10.12.0/firebase-auth.js";
+
+const COLS=['quotations','challans','invoices','salestaxinvoices','commercialbills','purchases','customers','suppliers','products','payments','expenses','bankaccounts'];
+let db,auth,gProv,_uid,_demo=false;
+const UNSUB={};
+
+// Firebase config hardcoded — no wizard needed!
+const HARDCODED_CFG={apiKey:"AIzaSyDbyMa7YniGkpOiY1rlQQSivBcdwJfc_AM",authDomain:"alico-enterprises.firebaseapp.com",projectId:"alico-enterprises",storageBucket:"alico-enterprises.firebasestorage.app",messagingSenderId:"525551235120",appId:"1:525551235120:web:9a2768cf8c596d03077df5"};
+const getCfg=()=>HARDCODED_CFG;
+const setCfg=c=>localStorage.setItem('alico_fbcfg',JSON.stringify(c));
+
+window.saveConfig=()=>{
+  const g=id=>document.getElementById(id)?.value?.trim()||'';
+  const cfg={apiKey:g('c_apiKey'),authDomain:g('c_authDomain'),projectId:g('c_projectId'),storageBucket:g('c_storageBucket'),messagingSenderId:g('c_messagingSenderId'),appId:g('c_appId')};
+  if(!cfg.apiKey||!cfg.projectId){const e=document.getElementById('cfgErr');e.textContent='API Key and Project ID required.';e.classList.add('show');return;}
+  setCfg(cfg);location.reload();
+};
+window.useDemo=()=>{localStorage.setItem('alico_demo','1');_demo=true;document.getElementById('setupWiz').style.display='none';launchApp(null);};
+
+async function boot(){
+  if(localStorage.getItem('alico_demo')==='1'){_demo=true;launchApp(null);return;}
+  const cfg=getCfg();
+  if(!cfg){showWiz();return;}
+  try{
+    const app=initializeApp(cfg);
+    db=getFirestore(app);auth=getAuth(app);gProv=new GoogleAuthProvider();
+    enableIndexedDbPersistence(db).catch(()=>{});
+    onAuthStateChanged(auth,u=>{if(u){_uid=u.uid;document.getElementById('loginScreen').style.display='none';launchApp(u);}else showLogin();});
+  }catch(e){console.error(e);showWiz();}
+}
+
+function showWiz(){document.getElementById('setupWiz').style.display='block';document.getElementById('loginScreen').style.display='none';document.getElementById('mainNav').style.display='none';document.getElementById('app').style.display='none';}
+function showLogin(){document.getElementById('loginScreen').style.display='flex';document.getElementById('setupWiz').style.display='none';document.getElementById('mainNav').style.display='none';document.getElementById('app').style.display='none';}
+
+window.signInEmail=async()=>{
+  const email=document.getElementById('liEmail')?.value?.trim();
+  const pass=document.getElementById('liPass')?.value;
+  const btn=document.getElementById('liBtn');const err=document.getElementById('liErr');
+  if(!email||!pass){err.textContent='Enter email and password.';err.style.display='block';return;}
+  btn.textContent='Signing in…';btn.disabled=true;
+  try{await signInWithEmailAndPassword(auth,email,pass);}
+  catch(e){err.textContent=e.code==='auth/wrong-password'?'Wrong password.':e.code==='auth/user-not-found'?'No user found.':'Error: '+e.message;err.style.display='block';btn.textContent='🔐 Sign In';btn.disabled=false;}
+};
+window.signInGoogle=async()=>{try{await signInWithPopup(auth,gProv);}catch(e){toast('Google sign-in failed: '+e.message);}};
+window.doSignOut=async()=>{if(!confirm('Sign out?'))return;Object.values(UNSUB).forEach(u=>u&&u());if(!_demo&&auth)await fbOut(auth);else{localStorage.removeItem('alico_demo');location.reload();}};
+
+function launchApp(user){
+  document.getElementById('mainNav').style.display='block';document.getElementById('app').style.display='block';
+  if(_demo){
+    toast('🧪 Demo mode — data stays on this device only');
+    window.DB=localDB;window.FSAVE=localSave;window.FDEL=localDel;
+  }else{
+    window.DB=STATE;window.FSAVE=fbSave;window.FDEL=fbDel;
+    subscribeAll();watchNet();
+    if(user){const t=document.getElementById('sTxt');if(t)t.textContent=user.displayName||user.email||'Online';}
+  }
+  renderApp();
+}
+
+function subscribeAll(){
+  COLS.forEach(col=>{
+    if(UNSUB[col])UNSUB[col]();
+    const q2=query(collection(db,col),orderBy('updatedAt','desc'));
+    UNSUB[col]=onSnapshot(q2,snap=>{STATE[col]=snap.docs.map(d=>({id:d.id,...d.data()}));setSyncFill('done');renderApp();},err=>{console.error(col,err);setSyncFill('error');});
+  });
+}
+async function fbSave(col,doc2){setSyncFill('syncing');try{await setDoc(doc(db,col,doc2.id),{...doc2,updatedAt:new Date().toISOString()});setSyncFill('done');}catch(e){setSyncFill('error');toast('📶 Saved locally — syncs when online');}}
+async function fbDel(col,id){setSyncFill('syncing');try{await deleteDoc(doc(db,col,id));setSyncFill('done');}catch(e){setSyncFill('error');}}
+
+const LS={g:(k,d=[])=>{try{const v=localStorage.getItem('alico_'+k);return v?JSON.parse(v):d;}catch{return d;}},s:(k,v)=>{try{localStorage.setItem('alico_'+k,JSON.stringify(v));}catch{}}};
+
+// FIX #2: Seed data for demo mode
+const SEED_CUSTOMERS=[{id:'PTY-DEMO1',name:'Resident Engineer Hydel Power',phone:'061-696369',ntn:'9020348-8',address:'Shadiwal, Gujrat',email:'',balance:0,updatedAt:new Date().toISOString()},{id:'PTY-DEMO2',name:'Maria Abbas',phone:'03153205484',ntn:'5067369-0',address:'Hanif Mansion Flat 16, Shahnawaz Bhutto Road, Soldier Bazaar, Karachi East',email:'',balance:0,updatedAt:new Date().toISOString()}];
+const SEED_PRODUCTS=[{id:'PRD-DEMO1',name:'Pesticide Spray Round Up',unit:'Ltr',saleRate:2850,purchaseRate:2500,stock:200,minStock:20,category:'Pesticide',updatedAt:new Date().toISOString()},{id:'PRD-DEMO2',name:'Fire Pipe',unit:'Nos',saleRate:500,purchaseRate:400,stock:50,minStock:10,category:'Hardware',updatedAt:new Date().toISOString()},{id:'PRD-DEMO3',name:'Safety Gloves',unit:'Pair',saleRate:350,purchaseRate:280,stock:100,minStock:15,category:'Safety',updatedAt:new Date().toISOString()}];
+
+const localDB={
+  quotations:LS.g('quotations'),challans:LS.g('challans'),invoices:LS.g('invoices'),salestaxinvoices:LS.g('salestaxinvoices'),commercialbills:LS.g('commercialbills'),purchases:LS.g('purchases'),expenses:LS.g('expenses'),bankaccounts:LS.g('bankaccounts'),
+  customers:LS.g('customers').length?LS.g('customers'):SEED_CUSTOMERS,
+  suppliers:LS.g('suppliers'),
+  products:LS.g('products').length?LS.g('products'):SEED_PRODUCTS,
+  payments:LS.g('payments')
+};
+// Save seeds if first time
+if(!LS.g('customers').length){LS.s('customers',SEED_CUSTOMERS);}
+if(!LS.g('products').length){LS.s('products',SEED_PRODUCTS);}
+
+function localSave(col,doc2){const d=localDB;const idx=d[col].findIndex(x=>x.id===doc2.id);if(idx>=0)d[col][idx]=doc2;else d[col].unshift(doc2);LS.s(col,d[col]);toast('✅ Saved!');}
+function localDel(col,id){localDB[col]=localDB[col].filter(x=>x.id!==id);LS.s(col,localDB[col]);}
+
+function watchNet(){const update=()=>{const on=navigator.onLine;const dot=document.getElementById('sDot');const txt=document.getElementById('sTxt');if(dot)dot.className='dot '+(on?'online':'offline');if(txt)txt.textContent=on?'Online':'Offline — auto-syncs when back';if(!on)toast('📶 Offline mode — auto-syncs when connected');};window.addEventListener('online',update);window.addEventListener('offline',update);update();}
+
+let _st;
+window.setSyncFill=s=>{const b=document.getElementById('syncFill');if(!b)return;b.className='sync-fill '+s;clearTimeout(_st);if(s==='done'||s==='error')_st=setTimeout(()=>b.className='sync-fill',1600);};
+
+boot();
+</script>
+
+<!-- MAIN APP -->
+<script>
+"use strict";
+
+const STATE={quotations:[],challans:[],invoices:[],salestaxinvoices:[],commercialbills:[],purchases:[],customers:[],suppliers:[],products:[],payments:[],expenses:[],bankaccounts:[]};
+window.DB=STATE;
+window.FSAVE=(col,doc2)=>{const idx=STATE[col].findIndex(x=>x.id===doc2.id);if(idx>=0)STATE[col][idx]=doc2;else STATE[col].unshift(doc2);toast('✅ Saved!');};
+window.FDEL=(col,id)=>{STATE[col]=STATE[col].filter(x=>x.id!==id);};
+
+const CO={name:"ALICO ENTERPRISES",tagline:"CUSTOMER SATISFACTION IS OUR MOTTO",subtitle:"All Kinds of General Order Suppliers",address:"Office No. 418, Industrial Town Plaza, Shahrah-e-Liaquat, Karachi.",tel:"021-32429053",mobile:"0321-2429053, 0305-5675511",email:"alico.ent110@gmail.com",ntn:"5067369-0",gst:"42-1016-645-77-11"};
+const TAX_OPT=[0,5,8,10,12,16,17,18,19,20];
+const STATUS={
+  Quotation:["Draft","Sent","Approved","Rejected"],
+  Challan:["Pending","Dispatched","Delivered","Invoiced"],
+  Invoice:["Draft","Sent","Unpaid","Partial","Paid"],
+  SalesTaxInvoice:["Draft","Sent","Unpaid","Partial","Paid"],
+  CommercialBill:["Draft","Sent","Unpaid","Partial","Paid"],
+  Purchase:["Draft","Ordered","GRN Received","Paid"]
+};
+
+// Custom numbering AL-XXXX-YY — synced via Firebase counter
+function genDocNum(prefix){
+  const yy=String(new Date().getFullYear()).slice(-2);
+  const key='alico_cnt_'+prefix;
+  // Get highest existing number from current data to avoid duplicates
+  const db=window.DB||STATE;
+  const colMap={QT:'quotations',DC:'challans',INV:'invoices',STI:'salestaxinvoices',CB:'commercialbills',PO:'purchases',GRN:'purchases',PMT:'payments'};
+  const col=colMap[prefix]||'';
+  let maxN=parseInt(localStorage.getItem(key)||'6000');
+  // Scan existing docs to find highest number (prevents duplicate after Firebase sync)
+  if(col&&db[col]){
+    db[col].forEach(doc2=>{
+      const m=String(doc2.number||'').match(/AL-(\d+)-\d+/);
+      if(m){const n=parseInt(m[1]);if(n>maxN)maxN=n;}
+    });
+  }
+  const next=maxN+1;
+  localStorage.setItem(key,next);
+  return `AL-${next}-${yy}`;
+}
+function genId(prefix){
+  // For docs use custom numbering; for parties/products use random
+  if(['QT','DC','INV','STI','CB','PO','GRN','PMT'].includes(prefix)) return genDocNum(prefix);
+  const u=(typeof crypto!=='undefined'&&crypto.randomUUID)?crypto.randomUUID().replace(/-/g,'').slice(0,8).toUpperCase():Math.random().toString(36).slice(2,10).toUpperCase();
+  return `${prefix}-${u}`;
+}
+
+const today=()=>new Date().toISOString().slice(0,10);
+
+// ═══════════════════════════════════════════════
+// FIX #2: ROLE BASED ACCESS
+// Roles: 'admin' (full) | 'viewer' (read only)
+// ═══════════════════════════════════════════════
+const ROLES = { admin: 'admin', viewer: 'viewer' };
+let CURRENT_ROLE = localStorage.getItem('alico_role') || 'admin';
+let CURRENT_USER = localStorage.getItem('alico_user') || 'Admin';
+
+function setRole(role, user) {
+  CURRENT_ROLE = role;
+  CURRENT_USER = user || (role === 'admin' ? 'Admin' : 'Viewer');
+  localStorage.setItem('alico_role', CURRENT_ROLE);
+  localStorage.setItem('alico_user', CURRENT_USER);
+}
+
+function isAdmin() { return CURRENT_ROLE === 'admin'; }
+
+function requireAdmin(action) {
+  if (!isAdmin()) { toast('⛔ Viewer access only — cannot ' + action); return false; }
+  return true;
+}
+
+// ═══════════════════════════════════════════════
+// FIX #3: AUDIT LOG
+// ═══════════════════════════════════════════════
+const MAX_AUDIT = 200;
+function getAuditLog() {
+  try { return JSON.parse(localStorage.getItem('alico_audit') || '[]'); } catch { return []; }
+}
+function addAudit(action, col, docNum, extra) {
+  const log = getAuditLog();
+  log.unshift({
+    ts: new Date().toISOString(),
+    user: CURRENT_USER,
+    role: CURRENT_ROLE,
+    action, col,
+    doc: docNum || '',
+    extra: extra || ''
+  });
+  if (log.length > MAX_AUDIT) log.splice(MAX_AUDIT);
+  localStorage.setItem('alico_audit', JSON.stringify(log));
+}
+
+// ═══════════════════════════════════════════════
+// FIX #1: EXPORT / BACKUP / RESTORE
+// ═══════════════════════════════════════════════
+function exportBackup() {
+  const db = window.DB || STATE;
+  const backup = {
+    exportedAt: new Date().toISOString(),
+    exportedBy: CURRENT_USER,
+    version: '1.0',
+    data: {
+      quotations: db.quotations || [],
+      challans:   db.challans   || [],
+      invoices:   db.invoices   || [],
+      salestaxinvoices: db.salestaxinvoices || [],
+      commercialbills:  db.commercialbills  || [],
+      purchases:  db.purchases  || [],
+      customers:  db.customers  || [],
+      suppliers:  db.suppliers  || [],
+      products:   db.products   || [],
+      payments:   db.payments   || [],
+    }
+  };
+  const blob = new Blob([JSON.stringify(backup, null, 2)], { type: 'application/json' });
+  const url  = URL.createObjectURL(blob);
+  const a    = document.createElement('a');
+  a.href     = url;
+  a.download = `ALICO-Backup-${today()}.json`;
+  a.click();
+  URL.revokeObjectURL(url);
+  addAudit('EXPORT', 'all', '', 'Full backup exported');
+  toast('✅ Backup downloaded!');
+}
+
+function importBackup(input) {
+  if (!requireAdmin('import data')) return;
+  const file = input.files[0];
+  if (!file) return;
+  const reader = new FileReader();
+  reader.onload = e => {
+    try {
+      const backup = JSON.parse(e.target.result);
+      if (!backup.data) { toast('❌ Invalid backup file!'); return; }
+      const db = window.DB || STATE;
+      const cols = ['quotations','challans','invoices','purchases','customers','suppliers','products','payments'];
+      cols.forEach(col => {
+        if (backup.data[col]) {
+          db[col] = backup.data[col];
+          // persist locally too
+          try { localStorage.setItem('alico_' + col, JSON.stringify(db[col])); } catch {}
+          // sync to Firebase if connected
+          if (window.FSAVE && window.FSAVE !== window.FDEL) {
+            backup.data[col].forEach(doc2 => {
+              try { window.FSAVE(col, doc2); } catch {}
+            });
+          }
+        }
+      });
+      addAudit('IMPORT', 'all', '', `Restored from backup (${backup.exportedAt})`);
+      toast('✅ Data restored successfully!');
+      closeAllMods();
+      renderApp();
+    } catch(err) {
+      toast('❌ Error reading backup: ' + err.message);
+    }
+  };
+  reader.readAsText(file);
+}
+
+// FIX: Renumber old documents to AL-XXXX-YY format
+function renumberOldDocs() {
+  if(!requireAdmin('renumber documents')) return;
+  if(!confirm('Purane documents ko AL-XXXX-26 format mein convert karein?\n\nYe sab Quotations, Challans, Invoices, Purchase Orders ko naye number denge. Continue?')) return;
+  const db = window.DB || STATE;
+  const yy = String(new Date().getFullYear()).slice(-2);
+  const map = { quotations:'QT', challans:'DC', invoices:'INV', purchases:'PO' };
+  let count = 0;
+  Object.entries(map).forEach(([col, pfx]) => {
+    (db[col]||[]).forEach(doc2 => {
+      // Only renumber if NOT already in AL- format
+      if(!String(doc2.number||'').startsWith('AL-')) {
+        const newNum = genDocNum(pfx);
+        doc2.number = newNum;
+        doc2.updatedAt = new Date().toISOString();
+        window.FSAVE(col, doc2);
+        count++;
+      }
+    });
+  });
+  addAudit('RENUMBER','all','',`${count} documents renumbered to AL-XXXX-${yy}`);
+  toast(`✅ ${count} documents renumbered!`);
+  closeMod();
+  renderApp();
+}
+
+function openBackupModal() {
+  const log = getAuditLog().slice(0, 5);
+  openMod(`
+  <div class="mh"><div class="mt">📦 Backup & Restore</div><button class="btn bg bs" onclick="closeMod()">✕</button></div>
+
+  <div class="card" style="margin-bottom:14px;padding:16px;">
+    <div class="ct">📥 Export Backup</div>
+    <p style="font-size:13px;color:var(--muted);margin-bottom:14px;">Sab data (invoices, challans, customers, products) ek JSON file mein download hoga. Ye file safe rakhna — is se data restore ho sakta hai.</p>
+    <button class="btn bp bl" style="width:100%;justify-content:center;" onclick="exportBackup()">📥 Download Backup (JSON)</button>
+  </div>
+
+  <div class="card" style="margin-bottom:14px;padding:16px;">
+    <div class="ct">📤 Restore from Backup</div>
+    <p style="font-size:13px;color:var(--muted);margin-bottom:14px;">⚠️ Existing data overwrite ho jayega. Pehle backup lena.</p>
+    ${isAdmin()
+      ? `<label style="display:block;background:#EEF4FF;border:2px dashed var(--border);border-radius:10px;padding:20px;text-align:center;cursor:pointer;">
+          <div style="font-size:24px;margin-bottom:6px;">📤</div>
+          <div style="font-weight:700;color:var(--navy);font-size:13px;">Click to select backup file</div>
+          <div style="font-size:11px;color:var(--muted);margin-top:4px;">.json file only</div>
+          <input type="file" accept=".json" style="display:none;" onchange="importBackup(this)">
+        </label>`
+      : `<div style="background:#FFF3CD;border-radius:8px;padding:12px;font-size:12px;color:#856404;">⛔ Admin access required to restore data.</div>`}
+  </div>
+
+  <div class="card" style="margin-bottom:14px;padding:16px;">
+    <div class="ct">🔢 Fix Old Document Numbers</div>
+    <p style="font-size:13px;color:var(--muted);margin-bottom:14px;">Purane documents jinke random numbers hain (jaise DC-063F0C72DB) unhe naye <strong>AL-XXXX-26</strong> format mein convert karega.</p>
+    ${isAdmin()
+      ? `<button class="btn bp bl" style="width:100%;justify-content:center;" onclick="renumberOldDocs()">🔢 Renumber All Old Documents</button>`
+      : `<div style="background:#FFF3CD;border-radius:8px;padding:12px;font-size:12px;color:#856404;">⛔ Admin access required.</div>`}
+  </div>
+
+  <div class="card" style="padding:14px;">
+    <div class="ct">📋 Recent Activity</div>
+    ${log.length === 0
+      ? `<p style="font-size:13px;color:var(--muted);">No activity yet.</p>`
+      : `<table style="width:100%;border-collapse:collapse;font-size:12px;">
+          <thead><tr><th style="background:var(--navy);color:#fff;padding:8px;text-align:left;">Time</th><th style="background:var(--navy);color:#fff;padding:8px;">User</th><th style="background:var(--navy);color:#fff;padding:8px;">Action</th><th style="background:var(--navy);color:#fff;padding:8px;">Document</th></tr></thead>
+          <tbody>${log.map(l=>`<tr><td style="padding:8px;border-bottom:1px solid var(--border);font-size:11px;">${fmtD(l.ts.slice(0,10))} ${l.ts.slice(11,16)}</td><td style="padding:8px;border-bottom:1px solid var(--border);font-weight:700;">${esc(l.user)}</td><td style="padding:8px;border-bottom:1px solid var(--border);">${esc(l.action)}</td><td style="padding:8px;border-bottom:1px solid var(--border);">${esc(l.doc)}</td></tr>`).join('')}</tbody>
+        </table>`}
+    <div style="margin-top:10px;text-align:right;">
+      <button class="btn bo bs" onclick="go('audit');closeMod();">View Full Log →</button>
+    </div>
+  </div>`);
+}
+
+// ═══════════════════════════════════════════════
+// FIX #2: ROLE SETTINGS MODAL
+// ═══════════════════════════════════════════════
+function openRoleSettings() {
+  const ADMIN_PASS = localStorage.getItem('alico_admin_pass') || '1234';
+  openMod(`
+  <div class="mh"><div class="mt">👤 Role & Access Settings</div><button class="btn bg bs" onclick="closeMod()">✕</button></div>
+
+  <div style="background:${isAdmin()?'#D4EDDA':'#FFF3CD'};border-radius:10px;padding:14px;margin-bottom:16px;text-align:center;">
+    <div style="font-size:20px;margin-bottom:4px;">${isAdmin()?'🔓':'👁️'}</div>
+    <div style="font-weight:800;font-size:15px;color:var(--navy);">Current: ${isAdmin()?'ADMIN':'VIEWER'}</div>
+    <div style="font-size:12px;color:var(--muted);margin-top:2px;">Logged in as: ${esc(CURRENT_USER)}</div>
+  </div>
+
+  <div class="card" style="margin-bottom:14px;padding:14px;">
+    <div class="ct">🔓 Switch to Admin</div>
+    <div class="fld"><label class="lbl">Admin Password</label><input type="password" class="inp" id="rolePass" placeholder="Enter admin password" onkeydown="if(event.key==='Enter')switchToAdmin()"></div>
+    <button class="btn bp" style="width:100%;justify-content:center;" onclick="switchToAdmin()">🔓 Login as Admin</button>
+  </div>
+
+  <div class="card" style="margin-bottom:14px;padding:14px;">
+    <div class="ct">👁️ Switch to Viewer</div>
+    <p style="font-size:12px;color:var(--muted);margin-bottom:12px;">Viewer can only see data — cannot add, edit or delete anything.</p>
+    <button class="btn bg" style="width:100%;justify-content:center;" onclick="switchToViewer()">👁️ Switch to Viewer Mode</button>
+  </div>
+
+  ${isAdmin()?`
+  <div class="card" style="padding:14px;">
+    <div class="ct">🔑 Change Admin Password</div>
+    <div class="fld"><label class="lbl">New Password</label><input type="password" class="inp" id="newPass" placeholder="Min 4 characters"></div>
+    <button class="btn bo" style="width:100%;justify-content:center;" onclick="changeAdminPass()">💾 Save New Password</button>
+  </div>`:''}
+  `);
+}
+
+function switchToAdmin() {
+  const pass = document.getElementById('rolePass')?.value;
+  const stored = localStorage.getItem('alico_admin_pass') || '1234';
+  if (pass === stored) {
+    setRole('admin', 'Admin');
+    addAudit('LOGIN', '', '', 'Switched to Admin');
+    toast('✅ Admin access granted!');
+    closeMod(); renderApp();
+  } else {
+    toast('❌ Wrong password!');
+    document.getElementById('rolePass')?.classList.add('invalid');
+  }
+}
+
+function switchToViewer() {
+  setRole('viewer', 'Viewer');
+  addAudit('LOGIN', '', '', 'Switched to Viewer');
+  toast('👁️ Viewer mode — read only');
+  closeMod(); renderApp();
+}
+
+function changeAdminPass() {
+  const np = document.getElementById('newPass')?.value;
+  if (!np || np.length < 4) return toast('⚠️ Min 4 characters!');
+  localStorage.setItem('alico_admin_pass', np);
+  toast('✅ Password changed!');
+  closeMod();
+}
+const fmt=n=>`PKR ${Number(n||0).toLocaleString('en-PK',{minimumFractionDigits:2,maximumFractionDigits:2})}`;
+const fmtNum=n=>Number(n||0).toLocaleString('en-PK',{minimumFractionDigits:2,maximumFractionDigits:2});
+const fmtD=d=>d?new Date(d+'T00:00:00').toLocaleDateString('en-PK',{day:'2-digit',month:'short',year:'numeric'}):'—';
+const cleanText=s=>String(s||'').replace(/[\t\n\r]+/g,' ').replace(/\s+/g,' ').trim();
+const esc=s=>cleanText(s).replace(/&/g,'&amp;').replace(/</g,'&lt;').replace(/>/g,'&gt;').replace(/"/g,'&quot;');
+
+function toast(msg,dur=2500){const t=document.getElementById('toast');if(!t)return;t.textContent=msg;t.classList.add('show');setTimeout(()=>t.classList.remove('show'),dur);}
+function calcDoc(items,taxRate,discount){const sub=(items||[]).reduce((s,it)=>s+(+it.qty||0)*(+it.rate||0),0);const dA=sub*((+discount||0)/100);const tx=(sub-dA)*((+taxRate||0)/100);return{subtotal:sub,discountAmt:dA,taxAmt:tx,total:(sub-dA)+tx};}
+function bColor(s){if(['Paid','Delivered','Approved','GRN Received'].includes(s))return'green';if(['Unpaid','Rejected','Overdue'].includes(s))return'red';if(['Sent','Invoiced','Ordered'].includes(s))return'blue';return'yellow';}
+function dl(id,items){return`<datalist id="${id}">${items.map(i=>`<option value="${esc(i)}">`).join('')}</datalist>`;}
+
+// Stamp settings
+let STAMP_DATA=localStorage.getItem('alico_stamp')||'';
+// FIX #5: Signature visibility settings
+let SIG_SETTINGS=JSON.parse(localStorage.getItem('alico_sig')||'{"prep":true,"check":true,"auth":true,"showStamp":true}');
+function saveSigSettings(){localStorage.setItem('alico_sig',JSON.stringify(SIG_SETTINGS));}
+
+// FIX #4: Stock reverse — track old status to reverse stock if needed
+function handleStockChange(key, doc2, old) {
+  const wasDelivered = key==='challans' && old?.status==='Delivered';
+  const isDelivered  = key==='challans' && doc2.status==='Delivered';
+  const wasPaid      = key==='invoices' && old?.status==='Paid';
+  const isPaid       = key==='invoices' && doc2.status==='Paid';
+  const wasGRN       = key==='purchases' && old?.status==='GRN Received';
+  const isGRN        = key==='purchases' && doc2.status==='GRN Received';
+
+  // Deduct when newly delivered/paid
+  if(!wasDelivered && isDelivered) deductStock(doc2.items);
+  if(!wasPaid && isPaid)           deductStock(doc2.items);
+  if(!wasGRN && isGRN)             addStock(doc2.items);
+
+  // FIX #4: REVERSE stock when status goes back
+  if(wasDelivered && !isDelivered) addStock(doc2.items);   // Challan Delivered → Pending: add back
+  if(wasPaid && !isPaid)           addStock(doc2.items);   // Invoice Paid → Unpaid: add back
+  if(wasGRN && !isGRN)             deductStock(doc2.items); // PO GRN Received → Draft: remove again
+}
+
+function deductStock(items){const db=window.DB||STATE;(items||[]).forEach(it=>{if(!it.description)return;const idx=db.products.findIndex(p=>p.name.trim().toLowerCase()===cleanText(it.description).toLowerCase());if(idx>=0){db.products[idx].stock=Math.max(0,(+db.products[idx].stock||0)-(+it.qty||0));window.FSAVE('products',db.products[idx]);}});}
+function addStock(items){const db=window.DB||STATE;(items||[]).forEach(it=>{if(!it.description)return;const idx=db.products.findIndex(p=>p.name.trim().toLowerCase()===cleanText(it.description).toLowerCase());if(idx>=0){db.products[idx].stock=(+db.products[idx].stock||0)+(+it.qty||0);db.products[idx].purchaseRate=+it.rate||db.products[idx].purchaseRate;window.FSAVE('products',db.products[idx]);}});}
+
+// NAV
+let _view='dashboard',_mods=[];
+const NAVS=[{k:'dashboard',l:'🏠 Dashboard'},{k:'quotations',l:'📋 Quotations'},{k:'challans',l:'🚚 Challans'},{k:'salestax',l:'🧾 Sales Tax Invoice'},{k:'commercial',l:'📄 Commercial Bill'},{k:'purchases',l:'🛒 Purchases'},{k:'parties',l:'👥 Parties'},{k:'products',l:'📦 Products'},{k:'payments',l:'💰 Payments'},{k:'expenses',l:'💸 Expenses'},{k:'ledger',l:'📒 Ledger'},{k:'bank',l:'🏦 Bank'},{k:'reports',l:'📊 Reports'},{k:'audit',l:'📋 Audit Log'}];
+function renderNav(){const el=document.getElementById('navTabs');if(!el)return;el.innerHTML=NAVS.map(n=>`<button class="nav-tab${_view===n.k?' active':''}" onclick="go('${n.k}')">${n.l}</button>`).join('');}
+function go(v){_view=v;renderNav();renderApp();window.scrollTo({top:0,behavior:'smooth'});}
+function openMod(html){const d=document.createElement('div');d.className='modal-bg';d.innerHTML=`<div class="modal">${html}</div>`;d.addEventListener('click',e=>{if(e.target===d)closeMod();});document.body.appendChild(d);_mods.push(d);setTimeout(()=>{const f=d.querySelector('input,select,textarea');if(f)f.focus();},80);}
+function closeMod(){const m=_mods.pop();if(m)m.remove();}
+function closeAllMods(){_mods.forEach(m=>m.remove());_mods=[];}
+
+// ═══ PRINT ═══
+// FIX #2: Centered print + FIX #3: Challan items right after red line
+// FIX #5: Signature/stamp visibility
+function printDoc(doc2,type){
+  const{subtotal,discountAmt,taxAmt,total}=calcDoc(doc2.items,doc2.taxRate,doc2.discount);
+  const isChallan=type==='Delivery Challan';
+  // Map internal type to print label
+  const printLabel={
+    'Quotation':'QUOTATION',
+    'Delivery Challan':'DELIVERY CHALLAN',
+    'Invoice':'INVOICE',
+    'SalesTaxInvoice':'SALES TAX INVOICE',
+    'CommercialBill':'COMMERCIAL BILL',
+    'Purchase Order':'PURCHASE ORDER'
+  }[type] || type.toUpperCase();
+  document.getElementById('printPortal').innerHTML=buildPrint(doc2,printLabel,subtotal,discountAmt,taxAmt,total,isChallan);
+  window.print();
+  setTimeout(()=>{document.getElementById('printPortal').innerHTML='';},1000);
+}
+
+function buildPrint(doc2,type,subtotal,discountAmt,taxAmt,total,isChallan){
+  // FIX #5: Build signature section based on settings
+  const sig=SIG_SETTINGS;
+  const stampBlock=sig.showStamp&&STAMP_DATA
+    ?`<div style="border:2px solid #1B2A4A;border-radius:8px;height:80px;display:flex;align-items:center;justify-content:center;margin-bottom:8px;background:#fff;"><img src="${STAMP_DATA}" style="max-height:76px;max-width:100%;object-fit:contain;"></div>`
+    :sig.showStamp
+    ?`<div style="border:2px dashed #D5DCE8;border-radius:8px;height:80px;display:flex;align-items:center;justify-content:center;font-size:11px;color:#6B7A99;margin-bottom:8px;background:#FAFAFA;">Stamp / Seal</div>`
+    :'';
+
+  const sigCols=[
+    sig.prep?`<div style="text-align:center;"><div style="border:2px dashed #D5DCE8;border-radius:8px;height:80px;margin-bottom:8px;background:#FAFAFA;"></div><div style="border-top:1.5px solid #1B2A4A;padding-top:8px;font-size:10px;color:#6B7A99;font-weight:700;">Prepared By</div></div>`:'',
+    sig.check?`<div style="text-align:center;"><div style="border:2px dashed #D5DCE8;border-radius:8px;height:80px;margin-bottom:8px;background:#FAFAFA;"></div><div style="border-top:1.5px solid #1B2A4A;padding-top:8px;font-size:10px;color:#6B7A99;font-weight:700;">Checked By</div></div>`:'',
+    sig.auth?`<div style="text-align:center;">${stampBlock}<div style="border-top:1.5px solid #1B2A4A;padding-top:8px;font-size:10px;color:#6B7A99;font-weight:700;">Authorized Signatory</div></div>`:'',
+  ].filter(Boolean);
+
+  const sigCount=sigCols.length;
+  const sigSection=sigCount>0?`
+    <div style="display:grid;grid-template-columns:${sigCols.map(()=>'1fr').join(' ')};gap:24px;margin-top:40px;">
+      ${sigCols.join('')}
+    </div>`:'';
+
+  // FIX #3: Challan — only #, Description, Unit, Qty columns
+  const tHead=isChallan
+    ?`<tr style="background:#0A1628;"><th style="color:#fff;padding:9px 10px;font-size:10px;font-weight:800;">#</th><th style="color:#fff;padding:9px 10px;font-size:10px;font-weight:800;">DESCRIPTION</th><th style="color:#fff;padding:9px 10px;font-size:10px;font-weight:800;text-align:center;">UNIT</th><th style="color:#fff;padding:9px 10px;font-size:10px;font-weight:800;text-align:right;">QTY</th></tr>`
+    :`<tr style="background:#0A1628;"><th style="color:#fff;padding:9px 10px;font-size:10px;font-weight:800;">#</th><th style="color:#fff;padding:9px 10px;font-size:10px;font-weight:800;">DESCRIPTION</th><th style="color:#fff;padding:9px 10px;font-size:10px;font-weight:800;text-align:center;">UNIT</th><th style="color:#fff;padding:9px 10px;font-size:10px;font-weight:800;text-align:right;">QTY</th><th style="color:#fff;padding:9px 10px;font-size:10px;font-weight:800;text-align:right;">RATE</th><th style="color:#fff;padding:9px 10px;font-size:10px;font-weight:800;text-align:right;">AMOUNT</th></tr>`;
+
+  const tRows=(doc2.items||[]).map((it,i)=>{
+    const amt=(+it.qty||0)*(+it.rate||0);
+    const bg=i%2===0?'#fff':'#F7F9FC';
+    if(isChallan)return`<tr style="background:${bg};"><td style="padding:9px 10px;border-bottom:1px solid #D5DCE8;">${i+1}</td><td style="padding:9px 10px;border-bottom:1px solid #D5DCE8;">${esc(it.description)}</td><td style="padding:9px 10px;border-bottom:1px solid #D5DCE8;text-align:center;">${esc(it.unit)}</td><td style="padding:9px 10px;border-bottom:1px solid #D5DCE8;text-align:right;font-weight:700;">${it.qty}</td></tr>`;
+    return`<tr style="background:${bg};"><td style="padding:9px 10px;border-bottom:1px solid #D5DCE8;">${i+1}</td><td style="padding:9px 10px;border-bottom:1px solid #D5DCE8;">${esc(it.description)}</td><td style="padding:9px 10px;border-bottom:1px solid #D5DCE8;text-align:center;">${esc(it.unit)}</td><td style="padding:9px 10px;border-bottom:1px solid #D5DCE8;text-align:right;">${it.qty}</td><td style="padding:9px 10px;border-bottom:1px solid #D5DCE8;text-align:right;">${fmt(it.rate)}</td><td style="padding:9px 10px;border-bottom:1px solid #D5DCE8;text-align:right;font-weight:700;">${fmt(amt)}</td></tr>`;
+  }).join('');
+
+  const totBlock=isChallan?'':`
+    <div style="display:flex;justify-content:flex-end;margin-top:16px;">
+      <div style="min-width:260px;">
+        <div style="display:flex;justify-content:space-between;font-size:13px;color:#6B7A99;margin-bottom:5px;"><span>Subtotal</span><span>${fmt(subtotal)}</span></div>
+        ${doc2.discount>0?`<div style="display:flex;justify-content:space-between;font-size:13px;color:#6B7A99;margin-bottom:5px;"><span>Discount (${doc2.discount}%)</span><span>-${fmt(discountAmt)}</span></div>`:''}
+        ${doc2.taxRate>0?`<div style="display:flex;justify-content:space-between;font-size:13px;color:#6B7A99;margin-bottom:5px;"><span>GST (${doc2.taxRate}%)</span><span>${fmt(taxAmt)}</span></div>`:''}
+        <div style="display:flex;justify-content:space-between;font-weight:800;font-size:17px;color:#fff;background:#0A1628;padding:11px 14px;border-radius:8px;margin-top:8px;"><span>TOTAL</span><span>${fmt(total)}</span></div>
+      </div>
+    </div>`;
+
+  // FIX #2: Centered header — logo + company name centered on page
+  return`
+  <div style="background:#fff;padding:28px 32px;max-width:780px;margin:0 auto;font-family:-apple-system,BlinkMacSystemFont,'Segoe UI',Roboto,Helvetica,Arial,sans-serif;">
+    <!-- HEADER — CENTERED -->
+    <div style="border-bottom:4px solid #8B0000;padding-bottom:14px;margin-bottom:18px;">
+      <!-- Logo + Name centered -->
+      <div style="display:flex;flex-direction:column;align-items:center;text-align:center;margin-bottom:12px;">
+        <div style="display:flex;align-items:center;gap:14px;justify-content:center;">
+          <svg width="56" height="56" viewBox="0 0 100 100"><rect x="5" y="22" width="44" height="33" fill="#1B2A4A" transform="rotate(-8 27 38)" rx="4"/><rect x="33" y="12" width="44" height="33" fill="#C0392B" transform="rotate(-8 55 28)" rx="4"/><rect x="20" y="44" width="36" height="26" fill="#E74C3C" transform="rotate(-8 38 57)" rx="4"/></svg>
+          <div style="text-align:left;">
+            <div style="font-size:28px;font-weight:900;color:#0A1628;letter-spacing:2px;">${CO.name}</div>
+            <div style="font-size:11px;color:#A01E1E;letter-spacing:1px;font-weight:800;margin-top:2px;">${CO.tagline}</div>
+            <div style="font-size:11px;color:#6B7A99;font-weight:600;">${CO.subtitle}</div>
+          </div>
+        </div>
+      </div>
+      <!-- Company contact info — centered -->
+      <div style="font-size:11px;color:#2C3E50;text-align:center;line-height:1.7;margin-bottom:12px;font-weight:600;">
+        📍 ${CO.address}<br>
+        📞 ${CO.tel} | ${CO.mobile} &nbsp;•&nbsp; ✉️ ${CO.email}<br>
+        NTN: ${CO.ntn} | GST: ${CO.gst}
+      </div>
+      <!-- Document type badge + number — right aligned -->
+      <div style="display:flex;justify-content:flex-end;align-items:flex-start;gap:16px;margin-top:4px;margin-bottom:0;">
+      </div>
+    </div>
+
+    <!-- BILL TO + DOCUMENT TYPE — side by side after red line -->
+    <div style="display:grid;grid-template-columns:1fr 1fr;gap:14px;margin-bottom:14px;">
+      <div style="background:#F7F9FC;border-radius:8px;padding:14px;">
+        <div style="font-size:10px;font-weight:800;color:#2C3E50;margin-bottom:6px;letter-spacing:.6px;">${type==='Purchase Order'?'SUPPLIER':'BILL TO / DELIVER TO'}</div>
+        <div style="font-weight:800;font-size:15px;color:#0A1628;">${esc(doc2.customerName||doc2.supplierName||'—')}</div>
+        ${(doc2.customerAddress||doc2.supplierAddress)?`<div style="font-size:12px;color:#6B7A99;margin-top:3px;">${esc(doc2.customerAddress||doc2.supplierAddress)}</div>`:''}
+        ${(doc2.customerPhone||doc2.supplierPhone)?`<div style="font-size:12px;color:#6B7A99;">📞 ${esc(doc2.customerPhone||doc2.supplierPhone)}</div>`:''}
+        ${(doc2.customerNTN||doc2.supplierNTN)?`<div style="font-size:12px;color:#6B7A99;">NTN: ${esc(doc2.customerNTN||doc2.supplierNTN)}</div>`:''}
+      </div>
+      <div style="background:#F7F9FC;border-radius:8px;padding:14px;text-align:right;">
+        <div style="background:#0A1628;color:#fff;padding:7px 20px;border-radius:8px;font-weight:900;font-size:15px;letter-spacing:1.5px;display:inline-block;margin-bottom:10px;border:1px solid #8B0000;">${type.toUpperCase()}</div>
+        <div style="font-size:13px;color:#6B7A99;margin-bottom:4px;">No: <strong style="color:#1B2A4A;font-size:14px;">${esc(doc2.number)}</strong></div>
+        <div style="font-size:12px;color:#6B7A99;">Date: <strong>${fmtD(doc2.date)}</strong></div>
+        ${doc2.dueDate?`<div style="font-size:12px;color:#6B7A99;">Due: <strong>${fmtD(doc2.dueDate)}</strong></div>`:''}
+        ${doc2.grnNo?`<div style="font-size:12px;color:#6B7A99;">GRN: <strong>${esc(doc2.grnNo)}</strong></div>`:''}
+        ${isChallan&&doc2.driver?`<div style="font-size:12px;color:#6B7A99;margin-top:6px;">Driver: <strong>${esc(doc2.driver)}</strong></div><div style="font-size:12px;color:#6B7A99;">Vehicle: <strong>${esc(doc2.vehicle)}</strong></div>${doc2.dispatchDate?`<div style="font-size:12px;color:#6B7A99;">Dispatch: <strong>${fmtD(doc2.dispatchDate)}</strong></div>`:''}`:''} 
+      </div>
+    </div>
+
+    <!-- ITEMS — for Challan starts right here after red line above -->
+    <table style="width:100%;border-collapse:collapse;font-size:13px;">
+      <thead>${tHead}</thead>
+      <tbody>${tRows}</tbody>
+    </table>
+
+    ${totBlock}
+
+    ${doc2.notes?`<div style="margin-top:14px;padding:12px;background:#F7F9FC;border-radius:8px;font-size:12px;color:#6B7A99;"><strong>Notes:</strong> ${esc(doc2.notes)}</div>`:''}
+
+    ${sigSection}
+
+    <div style="margin-top:20px;border-top:3px solid #8B0000;padding-top:10px;text-align:center;font-size:10px;color:#2C3E50;font-weight:600;">
+      ${CO.name} | ${CO.address} | Tel: ${CO.tel} | ${CO.email} | NTN: ${CO.ntn} | GST: ${CO.gst}
+    </div>
+  </div>`;
+}
+
+// ═══ STAMP & SIGNATURE SETTINGS ═══
+function openStampSettings(){
+  const s=SIG_SETTINGS;
+  openMod(`
+  <div class="mh"><div class="mt">🖋️ Stamp & Signature Settings</div><button class="btn bg bs" onclick="closeMod()">✕</button></div>
+
+  <!-- FIX #5: Toggle each signature box on/off -->
+  <div class="card" style="margin-bottom:14px;padding:14px;">
+    <div class="ct" style="margin-bottom:10px;">📝 Signature Boxes on Print</div>
+    <p style="font-size:12px;color:var(--muted);margin-bottom:12px;">Turn off = box won't appear on printed document. Physical signature/stamp can be added on paper.</p>
+    <div style="display:flex;flex-direction:column;gap:10px;">
+      <label style="display:flex;align-items:center;gap:10px;font-size:13px;font-weight:600;cursor:pointer;">
+        <input type="checkbox" id="sigPrep" ${s.prep?'checked':''} onchange="SIG_SETTINGS.prep=this.checked;saveSigSettings();" style="width:18px;height:18px;">
+        ✅ Show "Prepared By" box
+      </label>
+      <label style="display:flex;align-items:center;gap:10px;font-size:13px;font-weight:600;cursor:pointer;">
+        <input type="checkbox" id="sigCheck" ${s.check?'checked':''} onchange="SIG_SETTINGS.check=this.checked;saveSigSettings();" style="width:18px;height:18px;">
+        ✅ Show "Checked By" box
+      </label>
+      <label style="display:flex;align-items:center;gap:10px;font-size:13px;font-weight:600;cursor:pointer;">
+        <input type="checkbox" id="sigAuth" ${s.auth?'checked':''} onchange="SIG_SETTINGS.auth=this.checked;saveSigSettings();" style="width:18px;height:18px;">
+        ✅ Show "Authorized Signatory" box
+      </label>
+      <label style="display:flex;align-items:center;gap:10px;font-size:13px;font-weight:600;cursor:pointer;">
+        <input type="checkbox" id="sigStamp" ${s.showStamp?'checked':''} onchange="SIG_SETTINGS.showStamp=this.checked;saveSigSettings();" style="width:18px;height:18px;">
+        🖋️ Show Stamp/Seal box
+      </label>
+    </div>
+  </div>
+
+  <div class="card" style="margin-bottom:14px;padding:14px;">
+    <div class="ct" style="margin-bottom:10px;">🖋️ Digital Stamp Image</div>
+    <p style="font-size:12px;color:var(--muted);margin-bottom:12px;">Upload company stamp PNG. Appears on "Authorized Signatory" box when printing digitally.</p>
+    <div class="stamp-upload-area" onclick="document.getElementById('stampFile').click()">
+      ${STAMP_DATA?`<img src="${STAMP_DATA}" class="stamp-preview"><br><span style="font-size:12px;color:var(--muted);">Click to change</span>`:'<div style="font-size:32px;margin-bottom:8px;">🖋️</div><div style="font-weight:700;color:var(--navy);font-size:13px;">Click to upload stamp/seal image</div><div style="font-size:11px;color:var(--muted);margin-top:4px;">PNG with transparent background works best</div>'}
+    </div>
+    <input type="file" id="stampFile" accept="image/*" style="display:none;" onchange="uploadStamp(this)">
+    ${STAMP_DATA?`<div style="margin-top:12px;text-align:center;"><button class="btn bd bs" onclick="removeStamp()">🗑️ Remove Stamp</button></div>`:''}
+  </div>
+
+  <div style="background:#EEF4FF;border-radius:8px;padding:12px;margin-bottom:14px;font-size:12px;color:#1B2A4A;">
+    <strong>💡 Tip:</strong> Agar hard copy pe physical stamp lagani ho — signature boxes OFF kar do. Print karke manually stamp aur sign karo. Digital copy ke liye stamp ON rakho.
+  </div>
+
+  <div style="display:flex;gap:8px;justify-content:flex-end;">
+    <button class="btn bp" onclick="closeMod();toast('✅ Settings saved!')">✅ Done</button>
+  </div>`);
+}
+
+function uploadStamp(input){const file=input.files[0];if(!file)return;const reader=new FileReader();reader.onload=e=>{STAMP_DATA=e.target.result;localStorage.setItem('alico_stamp',STAMP_DATA);toast('✅ Stamp saved!');closeMod();};reader.readAsDataURL(file);}
+function removeStamp(){STAMP_DATA='';localStorage.removeItem('alico_stamp');toast('Stamp removed.');closeMod();}
+
+// ═══ ITEMS TABLE ═══
+let _rc=0,_formType='';
+
+function iRowHTML(it,rowId,taxRate){
+  const isChallan=_formType==='Challan';
+  const sub=(+it.qty||0)*(+it.rate||0),tax=sub*(+taxRate/100);
+  return`<tr id="ir_${rowId}">
+    <td style="padding:5px 4px;min-width:140px;"><input list="prod-dl" class="inp" value="${esc(it.description||'')}" placeholder="Description" oninput="autoFillProd(this,'${rowId}')" style="font-size:12px;"></td>
+    <td style="padding:5px 4px;width:72px;"><input class="inp" value="${esc(it.unit||'')}" placeholder="Unit" oninput="recalc()" style="font-size:12px;"></td>
+    <td style="padding:5px 4px;width:72px;"><input type="number" class="inp" value="${it.qty||1}" min="0" oninput="recalc()" style="font-size:12px;"></td>
+    ${isChallan?'':`<td style="padding:5px 4px;width:105px;"><input type="number" class="inp" value="${it.rate||0}" min="0" oninput="recalc()" style="font-size:12px;"></td>`}
+    ${isChallan?'':`<td style="padding:5px 8px;text-align:right;font-weight:600;font-size:12px;" id="is_${rowId}">${fmtNum(sub)}</td>`}
+    ${isChallan?'':`<td style="padding:5px 8px;text-align:right;font-size:12px;" id="ix_${rowId}">${+taxRate>0?fmtNum(tax):'—'}</td>`}
+    ${isChallan?'':`<td style="padding:5px 8px;text-align:right;font-weight:700;font-size:12px;color:var(--navy);" id="it_${rowId}">${fmtNum(sub+tax)}</td>`}
+    <td style="padding:5px 4px;width:36px;"><button class="btn bd bs" onclick="removeRow('${rowId}')" title="Remove">✕</button></td>
+  </tr>`;
+}
+
+function addRow(it){const tb=document.getElementById('itemsBody');if(!tb)return;const id='r'+(++_rc);const tax=parseFloat(document.getElementById('fTaxRate')?.value)||0;const tr=document.createElement('tr');tr.id='ir_'+id;tr.innerHTML=iRowHTML(it||{description:'',unit:'',qty:1,rate:0},id,tax).replace(/^<tr[^>]*>/,'').replace(/<\/tr>$/,'');tb.appendChild(tr);}
+function removeRow(id){document.getElementById('ir_'+id)?.remove();recalc();}
+function getRows(){return Array.from(document.querySelectorAll('#itemsBody tr')).map(tr=>{const inp=tr.querySelectorAll('input');return{description:cleanText(inp[0]?.value||''),unit:cleanText(inp[1]?.value||''),qty:parseFloat(inp[2]?.value)||0,rate:_formType==='Challan'?0:parseFloat(inp[3]?.value)||0};});}
+
+function recalc(){
+  const isChallan=_formType==='Challan';
+  const tax=parseFloat(document.getElementById('fTaxRate')?.value)||0;
+  const disc=parseFloat(document.getElementById('fDiscount')?.value)||0;
+  let sub=0;
+  document.querySelectorAll('#itemsBody tr').forEach(tr=>{
+    const id=tr.id.replace('ir_','');const inp=tr.querySelectorAll('input');
+    const q=parseFloat(inp[2]?.value)||0;
+    const r=isChallan?0:parseFloat(inp[3]?.value)||0;
+    const s=q*r,x=s*(tax/100);sub+=s;
+    if(!isChallan){const se=document.getElementById('is_'+id),xe=document.getElementById('ix_'+id),te=document.getElementById('it_'+id);if(se)se.textContent=fmtNum(s);if(xe)xe.textContent=tax>0?fmtNum(x):'—';if(te)te.textContent=fmtNum(s+x);}
+  });
+  if(!isChallan){const dA=sub*(disc/100),tx=(sub-dA)*(tax/100),tot=(sub-dA)+tx;const set=(id,v)=>{const e=document.getElementById(id);if(e)e.textContent=v;};set('tSub',fmtNum(sub));set('tDisc',fmtNum(dA));set('tTax',fmtNum(tx));set('tTot',fmtNum(tot));set('tTaxPct',tax);const dr=document.getElementById('tDR');const tr2=document.getElementById('tTR');if(dr)dr.style.display=disc>0?'':'none';if(tr2)tr2.style.display=tax>0?'':'none';}
+}
+
+function autoFillCust(v){const db=window.DB||STATE;const c=db.customers.find(x=>x.name===v);if(!c)return;const s=(id,v2)=>{const e=document.getElementById(id);if(e)e.value=v2;};s('fCustAddr',c.address||'');s('fCustPhone',c.phone||'');s('fCustNTN',c.ntn||'');}
+function autoFillSupp(v){const db=window.DB||STATE;const s2=db.suppliers.find(x=>x.name===v);if(!s2)return;const s=(id,v2)=>{const e=document.getElementById(id);if(e)e.value=v2;};s('fSuppAddr',s2.address||'');s('fSuppPhone',s2.phone||'');s('fSuppNTN',s2.ntn||'');}
+function autoFillProd(inp,rowId){const db=window.DB||STATE;const p=db.products.find(x=>x.name===inp.value);if(!p)return;const tr=document.getElementById('ir_'+rowId);if(!tr)return;const inputs=tr.querySelectorAll('input');if(inputs[1])inputs[1].value=p.unit||'';if(!_formType==='Challan'&&inputs[3])inputs[3].value=p.saleRate||0;recalc();}
+function toggleChip(id,el){el.classList.toggle('on');}
+function loadFromChallans(){const db=window.DB||STATE;const sel=Array.from(document.querySelectorAll('#cChips .chip.on')).map(el=>{const m=el.getAttribute('onclick').match(/'([^']+)'/);return m?m[1]:null;}).filter(Boolean);if(!sel.length)return toast('⚠️ No challans selected!');const linked=db.challans.filter(c=>sel.includes(c.id));const items=linked.flatMap(c=>(c.items||[]));const tb=document.getElementById('itemsBody');if(!tb)return;tb.innerHTML='';_rc=0;items.forEach(it=>addRow(it));const f=linked[0];if(f?.customerName){const e=document.getElementById('fCustName');if(e){e.value=f.customerName;autoFillCust(f.customerName);}}recalc();toast('✅ Items loaded!');}
+
+function vReq(fId,eId,msg){const e=document.getElementById(fId);const er=document.getElementById(eId);if(!e)return true;const ok=e.value.trim().length>0;e.classList.toggle('invalid',!ok);if(er){er.textContent=msg||'Required.';er.classList.toggle('show',!ok);}return ok;}
+function clearV(){document.querySelectorAll('.invalid').forEach(e=>e.classList.remove('invalid'));document.querySelectorAll('.err').forEach(e=>e.classList.remove('show'));}
+
+// ═══ DOC FORM ═══
+function docFormHTML(type,doc2){
+  const db=window.DB||STATE;
+  _formType=type;
+  const isNew=!doc2||!doc2.id;
+  const pfx={Quotation:'QT',Challan:'DC',Invoice:'INV',SalesTaxInvoice:'STI',CommercialBill:'CB'}[type]||'DOC';
+  const isChallan=type==='Challan';
+  const isSTI=type==='SalesTaxInvoice';
+  const isCB=type==='CommercialBill';
+  const d=isNew?{id:genId(pfx),number:genId(pfx),date:today(),dueDate:'',customerName:'',customerAddress:'',customerPhone:'',customerNTN:'',items:[{description:'',unit:'',qty:1,rate:0}],taxRate:18,discount:0,notes:'',status:STATUS[type]?.[2]||'Draft',linkedChallanIds:[],driver:'',vehicle:'',dispatchDate:''}:{...doc2,customerName:cleanText(doc2.customerName),customerAddress:cleanText(doc2.customerAddress),notes:cleanText(doc2.notes)};
+  const cNames=db.customers.map(c=>c.name);
+  const chips=type==='Invoice'?db.challans.filter(c=>c.status!=='Invoiced').map(c=>`<span class="chip${(d.linkedChallanIds||[]).includes(c.id)?' on':''}" onclick="toggleChip('${c.id}',this)">${esc(c.number)} — ${esc(c.customerName)}</span>`).join(''):'' ;
+  const{subtotal,discountAmt,taxAmt,total}=calcDoc(d.items,d.taxRate,d.discount);
+
+  // Challan form: no rate/tax/discount fields
+  const detailFields=isChallan?`
+    <div class="g2">
+      <div class="fld"><label class="lbl">Date</label><input type="date" class="inp" id="fDate" value="${esc(d.date)}"></div>
+      <div class="fld"><label class="lbl">Dispatch Date</label><input type="date" class="inp" id="fDispDate" value="${esc(d.dispatchDate||'')}"></div>
+      <div class="fld"><label class="lbl">Status</label><select class="inp" id="fStatus">${STATUS[type].map(s=>`<option${d.status===s?' selected':''}>${s}</option>`).join('')}</select></div>
+    </div>
+    <div class="g2" style="margin-top:6px;">
+      <div class="fld"><label class="lbl">Driver</label><input class="inp" id="fDriver" value="${esc(d.driver||'')}"></div>
+      <div class="fld"><label class="lbl">Vehicle No.</label><input class="inp" id="fVehicle" value="${esc(d.vehicle||'')}"></div>
+    </div>`
+  :`<div class="g2">
+      <div class="fld"><label class="lbl">Date</label><input type="date" class="inp" id="fDate" value="${esc(d.date)}"></div>
+      <div class="fld"><label class="lbl">${type==='Quotation'?'Valid Till':'Due Date'}</label><input type="date" class="inp" id="fDue" value="${esc(d.dueDate||'')}"></div>
+      <div class="fld"><label class="lbl">Tax Rate</label><select class="inp" id="fTaxRate" onchange="recalc()">${TAX_OPT.map(t=>`<option value="${t}"${d.taxRate==t?' selected':''}>${t===0?'0% (Tax Free)':t+'% GST'}</option>`).join('')}</select></div>
+      <div class="fld"><label class="lbl">Discount %</label><input type="number" class="inp" id="fDiscount" value="${d.discount||0}" min="0" max="100" oninput="recalc()"></div>
+      <div class="fld"><label class="lbl">Status</label><select class="inp" id="fStatus">${STATUS[type].map(s=>`<option${d.status===s?' selected':''}>${s}</option>`).join('')}</select></div>
+    </div>`;
+
+  const itemsTableHead=isChallan
+    ?`<tr style="background:#1B2A4A;"><th style="color:#fff;padding:9px 8px;font-size:10px;">DESCRIPTION</th><th style="color:#fff;padding:9px 8px;font-size:10px;">UNIT</th><th style="color:#fff;padding:9px 8px;font-size:10px;">QTY</th><th></th></tr>`
+    :`<tr style="background:#1B2A4A;"><th style="color:#fff;padding:9px 8px;font-size:10px;">DESCRIPTION</th><th style="color:#fff;padding:9px 8px;font-size:10px;">UNIT</th><th style="color:#fff;padding:9px 8px;font-size:10px;">QTY</th><th style="color:#fff;padding:9px 8px;font-size:10px;">RATE</th><th style="color:#fff;padding:9px 8px;font-size:10px;text-align:right;">SUBTOTAL</th><th style="color:#fff;padding:9px 8px;font-size:10px;text-align:right;">TAX</th><th style="color:#fff;padding:9px 8px;font-size:10px;text-align:right;">TOTAL</th><th></th></tr>`;
+
+  const totalsBlock=isChallan?'':`
+    <div style="display:flex;justify-content:flex-end;margin-top:14px;">
+      <div class="totbox">
+        <div class="totr"><span>Subtotal</span><span>PKR <span id="tSub">${fmtNum(subtotal)}</span></span></div>
+        <div class="totr" id="tDR" style="${d.discount>0?'':'display:none'}"><span>Discount %</span><span>-PKR <span id="tDisc">${fmtNum(discountAmt)}</span></span></div>
+        <div class="totr" id="tTR" style="${d.taxRate>0?'':'display:none'}"><span>GST (<span id="tTaxPct">${d.taxRate}</span>%)</span><span>PKR <span id="tTax">${fmtNum(taxAmt)}</span></span></div>
+        <div class="tott"><span>TOTAL</span><span>PKR <span id="tTot">${fmtNum(total)}</span></span></div>
+      </div>
+    </div>`;
+
+  return`
+  <div class="mh">
+    <div><div class="mt">${isNew?'New':'Edit'} ${type}</div><div style="font-size:11px;color:var(--muted);margin-top:2px;">No: <strong>${esc(d.number)}</strong></div></div>
+    <div style="display:flex;gap:8px;">
+      <button class="btn bo bs" onclick="printFormNow('${type}')">🖨️ Print</button>
+      <button class="btn bg bs" onclick="closeMod()">✕</button>
+    </div>
+  </div>
+  <input type="hidden" id="fId" value="${esc(d.id)}">
+  <input type="hidden" id="fNum" value="${esc(d.number)}">
+  ${type==='Invoice'?`<div class="cbox"><div style="font-size:12px;font-weight:700;color:var(--navy);margin-bottom:8px;">📦 Link Delivery Challans</div><div id="cChips">${chips||'<span style="font-size:12px;color:var(--muted);">No pending challans</span>'}</div>${chips?`<button class="btn bp bs" style="margin-top:8px;" onclick="loadFromChallans()">📥 Load Items from Challans</button>`:''}</div>`:''}
+
+  <div class="g2" style="margin-bottom:14px;">
+    <div class="card" style="margin:0;padding:14px;">
+      <div class="ct">👤 Bill To</div>
+      <div class="fld"><label class="lbl">Customer Name *</label>
+        <input list="cust-dl" class="inp" id="fCustName" value="${esc(d.customerName)}" placeholder="Search or type" oninput="autoFillCust(this.value);clearV()">
+        <div class="err" id="eCust">Customer name required.</div>${dl('cust-dl',cNames)}</div>
+      <div class="fld"><label class="lbl">Address</label><textarea class="inp" id="fCustAddr" style="min-height:58px;">${esc(d.customerAddress)}</textarea></div>
+      <div class="g2">
+        <div class="fld"><label class="lbl">Phone</label><input class="inp" id="fCustPhone" value="${esc(d.customerPhone||'')}"></div>
+        <div class="fld"><label class="lbl">NTN/STRN</label><input class="inp" id="fCustNTN" value="${esc(d.customerNTN||'')}"></div>
+      </div>
+    </div>
+    <div class="card" style="margin:0;padding:14px;">
+      <div class="ct">📅 Details</div>
+      ${detailFields}
+    </div>
+  </div>
+
+  <div class="card" style="margin-bottom:14px;padding:14px;">
+    <div style="display:flex;justify-content:space-between;align-items:center;margin-bottom:10px;">
+      <div class="ct" style="margin:0;">📦 Items *</div>
+      <button class="btn bp bs" onclick="addRow()">+ Add Row</button>
+    </div>
+    <div class="err" id="eItems" style="margin-bottom:8px;">Add at least one item.</div>
+    <div class="tw"><table style="width:100%;border-collapse:collapse;">
+      <thead>${itemsTableHead}</thead>
+      <tbody id="itemsBody"></tbody>
+    </table></div>
+    ${dl('prod-dl',(window.DB||STATE).products.map(p=>p.name))}
+    ${totalsBlock}
+  </div>
+
+  <div class="card" style="margin-bottom:14px;padding:14px;">
+    <label class="lbl">Notes / Terms</label>
+    <textarea class="inp" id="fNotes" placeholder="Payment terms, delivery notes...">${esc(d.notes||'')}</textarea>
+  </div>
+
+  <div style="display:flex;gap:10px;justify-content:flex-end;flex-wrap:wrap;">
+    <button class="btn bg" onclick="closeMod()">Cancel</button>
+    <button class="btn bp bl" onclick="saveForm('${type}')">💾 Save ${type}</button>
+  </div>`;
+}
+
+function saveForm(type){
+  if(!requireAdmin('save '+type)) return;
+  const db=window.DB||STATE;clearV();
+  const ok1=vReq('fCustName','eCust','Customer name required.');
+  const rows=getRows();const ok2=rows.length>0&&rows[0].description.trim()!=='';
+  if(!ok2){const e=document.getElementById('eItems');if(e)e.classList.add('show');}
+  if(!ok1||!ok2)return toast('⚠️ Fill required fields!');
+  const g=id=>document.getElementById(id)?.value||'';
+  const isChallan=type==='Challan';
+  const tax=isChallan?0:parseFloat(g('fTaxRate'))||0;
+  const disc=isChallan?0:parseFloat(g('fDiscount'))||0;
+  const{subtotal,discountAmt,taxAmt,total}=calcDoc(rows,tax,disc);
+  const chips=Array.from(document.querySelectorAll('#cChips .chip.on')).map(el=>{const m=el.getAttribute('onclick').match(/'([^']+)'/);return m?m[1]:null;}).filter(Boolean);
+  const doc2={id:g('fId'),number:g('fNum'),type,date:g('fDate'),dueDate:isChallan?'':g('fDue'),
+    customerName:cleanText(g('fCustName')),customerAddress:cleanText(g('fCustAddr')),
+    customerPhone:cleanText(g('fCustPhone')),customerNTN:cleanText(g('fCustNTN')),
+    taxRate:tax,discount:disc,status:g('fStatus'),notes:cleanText(g('fNotes')),
+    driver:cleanText(g('fDriver')||''),vehicle:cleanText(g('fVehicle')||''),
+    dispatchDate:g('fDispDate')||'',linkedChallanIds:chips,
+    items:rows.map(r=>({...r,description:cleanText(r.description),unit:cleanText(r.unit)})),
+    subtotal,discountAmt,taxAmt,total,updatedAt:new Date().toISOString()};
+  const key={Quotation:'quotations',Challan:'challans',Invoice:'invoices',SalesTaxInvoice:'salestaxinvoices',CommercialBill:'commercialbills'}[type];
+  const old=db[key]?.find(x=>x.id===doc2.id);
+  // FIX #4: centralized stock handling with reverse support
+  handleStockChange(key, doc2, old);
+  window.FSAVE(key,doc2);
+  // FIX #3: audit log
+  addAudit(old?'EDIT':'CREATE', key, doc2.number, `Status: ${doc2.status}, Total: ${fmt(doc2.total)}`);
+  if(type==='Invoice'&&chips.length){chips.forEach(id=>{const idx=db.challans.findIndex(c=>c.id===id);if(idx>=0){db.challans[idx].status='Invoiced';window.FSAVE('challans',db.challans[idx]);}});}
+  closeAllMods();renderApp();
+}
+
+function printFormNow(type){
+  const rows=getRows();const g=id=>document.getElementById(id)?.value||'';
+  const isChallan=type==='Challan';
+  const tax=isChallan?0:parseFloat(g('fTaxRate'))||0;
+  const disc=isChallan?0:parseFloat(g('fDiscount'))||0;
+  const{subtotal,discountAmt,taxAmt,total}=calcDoc(rows,tax,disc);
+  const printType=isChallan?'Delivery Challan':type;
+  printDoc({number:g('fNum'),date:g('fDate'),dueDate:isChallan?'':g('fDue'),
+    customerName:cleanText(g('fCustName')),customerAddress:cleanText(g('fCustAddr')),
+    customerPhone:cleanText(g('fCustPhone')),driver:cleanText(g('fDriver')||''),
+    vehicle:cleanText(g('fVehicle')||''),dispatchDate:g('fDispDate')||'',
+    taxRate:tax,discount:disc,notes:cleanText(g('fNotes')),
+    items:rows.map(r=>({...r,description:cleanText(r.description)})),
+    subtotal,discountAmt,taxAmt,total},printType);
+}
+
+function openDocForm(type,existing){
+  _formType=type;
+  openMod(docFormHTML(type,existing||null));
+  setTimeout(()=>{_rc=0;const tb=document.getElementById('itemsBody');if(tb){tb.innerHTML='';((existing&&existing.items)||[{description:'',unit:'',qty:1,rate:0}]).forEach(it=>addRow(it));}recalc();},0);
+}
+function convertDoc(fromDoc,toType){const pfx={Quotation:'QT',Challan:'DC',Invoice:'INV',SalesTaxInvoice:'STI',CommercialBill:'CB'}[toType]||'DOC';const nd={...fromDoc,id:genId(pfx),number:genId(pfx),date:today(),status:STATUS[toType]?.[0]||'Draft',linkedFrom:fromDoc.number,linkedChallanIds:toType==='Invoice'?[fromDoc.id]:[]};openDocForm(toType,nd);}
+
+// ═══ PURCHASE FORM ═══
+function purchaseFormHTML(doc2){
+  const db=window.DB||STATE;_formType='Purchase';
+  const isNew=!doc2||!doc2.id;
+  const d=isNew?{id:genId('PO'),number:genId('PO'),grnNo:'',date:today(),expectedDelivery:'',supplierName:'',supplierAddress:'',supplierPhone:'',supplierNTN:'',items:[{description:'',unit:'',qty:1,rate:0}],taxRate:18,discount:0,notes:'',status:'Draft',receivedDate:''}:{...doc2,supplierName:cleanText(doc2.supplierName||''),notes:cleanText(doc2.notes||'')};
+  const sNames=db.suppliers.map(s=>s.name);
+  const{subtotal,discountAmt,taxAmt,total}=calcDoc(d.items,d.taxRate,d.discount);
+  return`
+  <div class="mh"><div><div class="mt">${isNew?'New':'Edit'} Purchase Order</div><div style="font-size:11px;color:var(--muted);">PO: <strong>${esc(d.number)}</strong></div></div>
+    <div style="display:flex;gap:8px;"><button class="btn bo bs" onclick="printPONow()">🖨️ Print</button><button class="btn bg bs" onclick="closeMod()">✕</button></div>
+  </div>
+  <input type="hidden" id="fId" value="${esc(d.id)}">
+  <input type="hidden" id="fNum" value="${esc(d.number)}">
+  <div class="ponote">🛒 Stock auto-increases when status = "GRN Received"</div>
+  <div class="g2" style="margin-bottom:14px;">
+    <div class="card" style="margin:0;padding:14px;">
+      <div class="ct">🏭 Supplier</div>
+      <div class="fld"><label class="lbl">Supplier Name *</label>
+        <input list="supp-dl" class="inp" id="fSuppName" value="${esc(d.supplierName||'')}" placeholder="Search supplier" oninput="autoFillSupp(this.value);clearV()">
+        <div class="err" id="eSupp">Supplier name required.</div>${dl('supp-dl',sNames)}</div>
+      <div class="fld"><label class="lbl">Address</label><textarea class="inp" id="fSuppAddr" style="min-height:58px;">${esc(d.supplierAddress||'')}</textarea></div>
+      <div class="g2">
+        <div class="fld"><label class="lbl">Phone</label><input class="inp" id="fSuppPhone" value="${esc(d.supplierPhone||'')}"></div>
+        <div class="fld"><label class="lbl">NTN/STRN</label><input class="inp" id="fSuppNTN" value="${esc(d.supplierNTN||'')}"></div>
+      </div>
+    </div>
+    <div class="card" style="margin:0;padding:14px;">
+      <div class="ct">📅 PO Details</div>
+      <div class="g2">
+        <div class="fld"><label class="lbl">PO Date</label><input type="date" class="inp" id="fDate" value="${esc(d.date)}"></div>
+        <div class="fld"><label class="lbl">Expected Delivery</label><input type="date" class="inp" id="fDue" value="${esc(d.expectedDelivery||'')}"></div>
+        <div class="fld"><label class="lbl">GRN Number</label><input class="inp" id="fGrn" value="${esc(d.grnNo||'')}" placeholder="Auto-generated"></div>
+        <div class="fld"><label class="lbl">Received Date</label><input type="date" class="inp" id="fRecDate" value="${esc(d.receivedDate||'')}"></div>
+        <div class="fld"><label class="lbl">Tax Rate</label><select class="inp" id="fTaxRate" onchange="recalc()">${TAX_OPT.map(t=>`<option value="${t}"${d.taxRate==t?' selected':''}>${t===0?'0% (Tax Free)':t+'% GST'}</option>`).join('')}</select></div>
+        <div class="fld"><label class="lbl">Discount %</label><input type="number" class="inp" id="fDiscount" value="${d.discount||0}" min="0" max="100" oninput="recalc()"></div>
+        <div class="fld"><label class="lbl">Status</label><select class="inp" id="fStatus">${STATUS.Purchase.map(s=>`<option${d.status===s?' selected':''}>${s}</option>`).join('')}</select></div>
+      </div>
+    </div>
+  </div>
+  <div class="card" style="margin-bottom:14px;padding:14px;">
+    <div style="display:flex;justify-content:space-between;align-items:center;margin-bottom:10px;">
+      <div class="ct" style="margin:0;">📦 Items *</div><button class="btn bp bs" onclick="addRow()">+ Add Row</button>
+    </div>
+    <div class="err" id="eItems" style="margin-bottom:8px;">Add at least one item.</div>
+    <div class="tw"><table style="width:100%;border-collapse:collapse;">
+      <thead><tr style="background:#1B2A4A;"><th style="color:#fff;padding:9px 8px;font-size:10px;">DESCRIPTION</th><th style="color:#fff;padding:9px 8px;font-size:10px;">UNIT</th><th style="color:#fff;padding:9px 8px;font-size:10px;">QTY</th><th style="color:#fff;padding:9px 8px;font-size:10px;">PURCHASE RATE</th><th style="color:#fff;padding:9px 8px;font-size:10px;text-align:right;">SUBTOTAL</th><th style="color:#fff;padding:9px 8px;font-size:10px;text-align:right;">TAX</th><th style="color:#fff;padding:9px 8px;font-size:10px;text-align:right;">TOTAL</th><th></th></tr></thead>
+      <tbody id="itemsBody"></tbody>
+    </table></div>
+    ${dl('prod-dl',(window.DB||STATE).products.map(p=>p.name))}
+    <div style="display:flex;justify-content:flex-end;margin-top:14px;">
+      <div class="totbox">
+        <div class="totr"><span>Subtotal</span><span>PKR <span id="tSub">${fmtNum(subtotal)}</span></span></div>
+        <div class="totr" id="tDR" style="display:none"><span>Discount</span><span>-PKR <span id="tDisc">0.00</span></span></div>
+        <div class="totr" id="tTR" style="${d.taxRate>0?'':'display:none'}"><span>GST (<span id="tTaxPct">${d.taxRate}</span>%)</span><span>PKR <span id="tTax">${fmtNum(taxAmt)}</span></span></div>
+        <div class="tott"><span>TOTAL</span><span>PKR <span id="tTot">${fmtNum(total)}</span></span></div>
+      </div>
+    </div>
+  </div>
+  <div class="card" style="margin-bottom:14px;padding:14px;"><label class="lbl">Notes</label><textarea class="inp" id="fNotes">${esc(d.notes||'')}</textarea></div>
+  <div style="display:flex;gap:10px;justify-content:flex-end;flex-wrap:wrap;">
+    <button class="btn bg" onclick="closeMod()">Cancel</button>
+    <button class="btn bp bl" onclick="savePO()">💾 Save Purchase Order</button>
+  </div>`;
+}
+
+function savePO(){
+  if(!requireAdmin('save Purchase Order')) return;
+  const db=window.DB||STATE;clearV();
+  const ok1=vReq('fSuppName','eSupp','Supplier name required.');
+  const rows=getRows();const ok2=rows.length>0&&rows[0].description.trim()!=='';
+  if(!ok2){const e=document.getElementById('eItems');if(e)e.classList.add('show');}
+  if(!ok1||!ok2)return toast('⚠️ Fill required fields!');
+  const g=id=>document.getElementById(id)?.value||'';
+  const tax=parseFloat(g('fTaxRate'))||0,disc=parseFloat(g('fDiscount'))||0;
+  const{subtotal,discountAmt,taxAmt,total}=calcDoc(rows,tax,disc);const ns=g('fStatus');
+  const doc2={id:g('fId'),number:g('fNum'),grnNo:g('fGrn')||genId('GRN'),date:g('fDate'),expectedDelivery:g('fDue'),receivedDate:g('fRecDate'),supplierName:cleanText(g('fSuppName')),supplierAddress:cleanText(g('fSuppAddr')),supplierPhone:cleanText(g('fSuppPhone')),supplierNTN:cleanText(g('fSuppNTN')),taxRate:tax,discount:disc,status:ns,notes:cleanText(g('fNotes')),items:rows.map(r=>({...r,description:cleanText(r.description)})),subtotal,discountAmt,taxAmt,total,updatedAt:new Date().toISOString()};
+  const old=db.purchases?.find(x=>x.id===doc2.id);
+  handleStockChange('purchases', doc2, old);
+  window.FSAVE('purchases',doc2);
+  addAudit(old?'EDIT':'CREATE','purchases',doc2.number,`Status: ${ns}`);
+  closeAllMods();renderApp();
+}
+function printPONow(){const rows=getRows();const g=id=>document.getElementById(id)?.value||'';const tax=parseFloat(g('fTaxRate'))||0,disc=parseFloat(g('fDiscount'))||0;const{subtotal,discountAmt,taxAmt,total}=calcDoc(rows,tax,disc);printDoc({number:g('fNum'),grnNo:g('fGrn'),date:g('fDate'),supplierName:cleanText(g('fSuppName')),supplierAddress:cleanText(g('fSuppAddr')),supplierPhone:cleanText(g('fSuppPhone')),taxRate:tax,discount:disc,notes:cleanText(g('fNotes')),items:rows.map(r=>({...r,description:cleanText(r.description)})),subtotal,discountAmt,taxAmt,total},'Purchase Order');}
+function openPO(existing){_formType='Purchase';openMod(purchaseFormHTML(existing||null));setTimeout(()=>{_rc=0;const tb=document.getElementById('itemsBody');if(tb){tb.innerHTML='';((existing&&existing.items)||[{description:'',unit:'',qty:1,rate:0}]).forEach(it=>addRow(it));}recalc();},0);}
+
+// SEARCH
+let _st2=null;
+function filterTable(){clearTimeout(_st2);_st2=setTimeout(()=>{const q=(document.getElementById('srch')?.value||'').toLowerCase();document.querySelectorAll('#docTbl tbody tr').forEach(r=>r.style.display=r.textContent.toLowerCase().includes(q)?'':'none');},150);}
+
+// ═══ DOC LIST ═══
+function docList(type){
+  const db=window.DB||STATE;
+  const key={Quotation:'quotations',Challan:'challans',Invoice:'invoices',SalesTaxInvoice:'salestaxinvoices',CommercialBill:'commercialbills',Purchase:'purchases'}[type];
+  const title={Quotation:'Quotations',Challan:'Delivery Challans',Invoice:'Invoices',SalesTaxInvoice:'Sales Tax Invoices',CommercialBill:'Commercial Bills',Purchase:'Purchases'}[type];
+  const icon={Quotation:'📋',Challan:'🚚',Invoice:'🧾',SalesTaxInvoice:'🧾',CommercialBill:'📄',Purchase:'🛒'}[type];
+  const cvt={Quotation:'Challan',Challan:'Invoice',Invoice:null,SalesTaxInvoice:null,CommercialBill:null,Purchase:null}[type];
+  const docs=db[key]||[];
+  return`
+  <div class="page">
+    <div class="ph"><div><div class="pt">${icon} ${title}</div><div class="ps">${docs.length} document${docs.length!==1?'s':''}</div></div>
+      <button class="btn bp bl" onclick="${type==='Purchase'?'openPO()':type==='SalesTaxInvoice'?'openDocForm(\'SalesTaxInvoice\')':type==='CommercialBill'?'openDocForm(\'CommercialBill\')':'openDocForm(\''+type+'\')'}">+ New ${type==='SalesTaxInvoice'?'Sales Tax Invoice':type==='CommercialBill'?'Commercial Bill':type}</button>
+    </div>
+    <div class="card" style="padding:12px;"><input class="inp" placeholder="🔍 Search..." id="srch" oninput="filterTable()" style="max-width:340px;"></div>
+    <div class="card" style="padding:0;overflow:hidden;">
+    ${docs.length===0?`<div class="empty"><div class="ei">${icon}</div><p>No ${title.toLowerCase()} yet.<br>Click <strong>"+ New ${type}"</strong> to create one.</p></div>`:`
+    <div class="tw"><table id="docTbl">
+      <thead><tr><th>NUMBER</th><th>CUSTOMER/SUPPLIER</th><th>DATE</th><th>AMOUNT</th><th>STATUS</th><th>ACTIONS</th></tr></thead>
+      <tbody>${[...docs].sort((a,b)=>new Date(b.date)-new Date(a.date)).map(d=>`
+      <tr>
+        <td style="font-weight:700;color:var(--navy);">${esc(d.number)}</td>
+        <td>${esc(cleanText(d.customerName||d.supplierName||'—'))}</td>
+        <td>${fmtD(d.date)}</td>
+        <td style="font-weight:700;">${fmt(d.total||0)}</td>
+        <td><span class="bdg bg-${bColor(d.status)}">${esc(d.status)}</span></td>
+        <td><div style="display:flex;gap:5px;flex-wrap:wrap;">
+          <button class="btn bo bs" onclick='${type==="Purchase"?"openPO":"openDocForm"}(${type==="Purchase"?"":'"'+type+'",'} ${JSON.stringify(d).replace(/\\/g,'\\\\').replace(/'/g,"&#39;")})'>✏️ Edit</button>
+          <button class="btn bo bs" onclick='printDoc(${JSON.stringify(d).replace(/\\/g,'\\\\').replace(/'/g,"&#39;")},"${type==='Challan'?'Delivery Challan':type==='Purchase'?'Purchase Order':type}")'>🖨️</button>
+          <button class="btn bg bs" onclick='shareOnWhatsApp(${JSON.stringify(d).replace(/\\/g,"&#92;").replace(/'/g,"&#39;")}"${type==='Challan'?'Delivery Challan':type==='Purchase'?'Purchase Order':type}")'>💬</button>
+          ${cvt?`<button class="btn bp bs" onclick='convertDoc(${JSON.stringify(d).replace(/\\/g,'\\\\').replace(/'/g,"&#39;")},"${cvt}")'>→ ${cvt}</button>`:''}
+          <button class="btn bd bs" onclick="if(confirm('Delete?')){if(!isAdmin()){toast('⛔ Viewer access only');return;}window.FDEL('${key}','${d.id}');addAudit('DELETE','${key}','${d.number||d.id}','');renderApp();}">🗑️</button>
+        </div></td>
+      </tr>`).join('')}
+      </tbody>
+    </table></div>`}
+    </div>
+  </div>`;
+}
+
+// ═══ DASHBOARD ═══
+function renderDash(){
+  const db=window.DB||STATE;
+  const inv=db.invoices||[],chal=db.challans||[],quot=db.quotations||[],prods=db.products||[],pmts=db.payments||[];
+  const tSales=inv.reduce((s,i)=>s+(+i.total||0),0);
+  const tPaid=pmts.filter(p=>p.type==='received').reduce((s,p)=>s+(+p.amount||0),0);
+  const unpaid=inv.filter(i=>i.status==='Unpaid');
+  const tPend=unpaid.reduce((s,i)=>s+(+i.total||0),0);
+  const pDel=chal.filter(c=>c.status==='Pending'||c.status==='Dispatched').length;
+  const recent=[...inv.map(d=>({...d,_t:'Invoice'})),...chal.map(d=>({...d,_t:'Challan'})),...quot.map(d=>({...d,_t:'Quotation'})),...(db.salestaxinvoices||[]).map(d=>({...d,_t:'STI'})),...(db.commercialbills||[]).map(d=>({...d,_t:'CB'}))].sort((a,b)=>new Date(b.date)-new Date(a.date)).slice(0,8);
+  const low=prods.filter(p=>(+p.stock||0)<=(+p.minStock||5));
+  // FIX #4: Data warning in demo mode
+  const demoWarn=localStorage.getItem('alico_demo')==='1'?`<div class="data-warn">⚠️ <strong>Demo Mode:</strong> Data saves in browser only. Clear browser cache = data lost. Connect Firebase for permanent cloud storage. <button class="btn bp bs" onclick="localStorage.removeItem('alico_demo');location.reload();" style="margin-left:8px;">🔥 Connect Firebase</button></div>`:'';
+  return`
+  <div class="page">
+    ${demoWarn}
+    <div class="ph">
+      <div><div class="pt">🏠 Dashboard</div><div class="ps">${fmtD(today())} — ALICO Business Suite</div></div>
+      <div style="display:flex;gap:6px;flex-wrap:wrap;">
+        <button class="btn bo bs" onclick="openBackupModal()">📥 Backup</button>
+        <button class="btn bo bs" onclick="openRoleSettings()">${isAdmin()?'🔓 Admin':'👁️ Viewer'}</button>
+        <button class="btn bo bs" onclick="openStampSettings()">🖋️ Stamp</button>
+      </div>
+    </div>
+    <div class="g4" style="margin-bottom:14px;">
+      <div class="stat" style="background:var(--navy);"><div class="sn" style="font-size:18px;">${fmt(tSales)}</div><div class="sl">Total Sales</div></div>
+      <div class="stat" style="background:var(--green);"><div class="sn" style="font-size:18px;">${fmt(tPaid)}</div><div class="sl">Amount Received</div></div>
+      <div class="stat" style="background:var(--red);"><div class="sn" style="font-size:18px;">${fmt(tPend)}</div><div class="sl">Pending Payment</div></div>
+      <div class="stat" style="background:var(--gold);"><div class="sn">${pDel}</div><div class="sl">Pending Deliveries</div></div>
+    </div>
+    <div class="g2">
+      <div class="card"><div class="ct">⚡ Quick Actions</div>
+        <div class="qg">
+          ${[["📋","New Quotation","openDocForm('Quotation')"],["🚚","New Challan","openDocForm('Challan')"],["🧾","New Invoice","openDocForm('Invoice')"],["🛒","New Purchase","go('purchases');setTimeout(()=>openPO(),50)"]].map(([i,l,f])=>`<button class="qb" onclick="${f}"><span class="qi">${i}</span>${l}</button>`).join('')}
+        </div>
+      </div>
+      <div class="card"><div class="ct">⚠️ Low Stock Alert</div>
+        ${low.length===0?`<div style="color:var(--green);font-size:13px;">✅ All items well stocked!</div>`:`<div class="tw"><table><thead><tr><th>ITEM</th><th>STOCK</th><th>MIN</th></tr></thead><tbody>${low.map(p=>`<tr><td style="font-weight:700;">${esc(p.name)}</td><td style="color:var(--red);font-weight:700;">${p.stock||0}</td><td>${p.minStock||5}</td></tr>`).join('')}</tbody></table></div>`}
+      </div>
+    </div>
+    <div class="card"><div class="ct">📄 Recent Documents</div>
+      ${recent.length===0?`<div class="empty"><div class="ei">📂</div><p>No documents yet. Create your first!</p></div>`:`<div class="tw"><table><thead><tr><th>TYPE</th><th>NUMBER</th><th>CUSTOMER</th><th>DATE</th><th>AMOUNT</th><th>STATUS</th></tr></thead><tbody>${recent.map(d=>`<tr><td><span class="bdg bg-${d._t==='Invoice'||d._t==='STI'?'blue':d._t==='Challan'?'yellow':d._t==='CB'?'gray':'green'}">${d._t}</span></td><td style="font-weight:700;">${esc(d.number)}</td><td>${esc(cleanText(d.customerName||'—'))}</td><td>${fmtD(d.date)}</td><td style="font-weight:700;">${fmt(d.total||0)}</td><td><span class="bdg bg-${bColor(d.status)}">${esc(d.status||'Draft')}</span></td></tr>`).join('')}</tbody></table></div>`}
+    </div>
+  </div>`;
+}
+
+// ═══ PARTIES ═══
+let _pTab='customers';
+function renderParties(){const db=window.DB||STATE;const list=db[_pTab]||[];return`<div class="page"><div class="ph"><div><div class="pt">👥 Customers & Suppliers</div></div><button class="btn bp bl" onclick="openPartyForm()">+ Add ${_pTab==='customers'?'Customer':'Supplier'}</button></div><div style="display:flex;gap:8px;margin-bottom:14px;"><button class="btn ${_pTab==='customers'?'bp':'bo'}" onclick="_pTab='customers';renderApp();">Customers</button><button class="btn ${_pTab==='suppliers'?'bp':'bo'}" onclick="_pTab='suppliers';renderApp();">Suppliers</button></div><div class="card" style="padding:0;overflow:hidden;">${list.length===0?`<div class="empty"><div class="ei">👤</div><p>No ${_pTab} yet.</p></div>`:`<div class="tw"><table><thead><tr><th>NAME</th><th>PHONE</th><th>NTN/STRN</th><th>EMAIL</th><th>BALANCE</th><th>ACTIONS</th></tr></thead><tbody>${list.map(p=>`<tr><td style="font-weight:700;">${esc(p.name)}</td><td>${esc(p.phone||'')}</td><td>${esc(p.ntn||'')}</td><td>${esc(p.email||'')}</td><td style="font-weight:700;color:${(+p.balance||0)>0?'var(--red)':'var(--green)'};">${fmt(p.balance||0)}</td><td style="display:flex;gap:5px;"><button class="btn bo bs" onclick='openPartyForm(${JSON.stringify(p).replace(/'/g,"&#39;")})'>✏️ Edit</button><button class="btn bd bs" onclick="if(confirm('Delete?')){window.FDEL('${_pTab}','${p.id}');renderApp();}">🗑️</button></td></tr>`).join('')}</tbody></table></div>`}</div></div>`;}
+function openPartyForm(ex){const isN=!ex;const d=ex||{id:genId('PTY'),name:'',phone:'',email:'',ntn:'',address:'',balance:0};const lbl=_pTab==='customers'?'Customer':'Supplier';openMod(`<div class="mh"><div class="mt">${isN?'Add':'Edit'} ${lbl}</div><button class="btn bg bs" onclick="closeMod()">✕</button></div><input type="hidden" id="pId" value="${esc(d.id)}"><div class="fld"><label class="lbl">Name *</label><input class="inp" id="pName" value="${esc(d.name)}"><div class="err" id="ePName">Name required.</div></div>${[['Phone','pPhone','text',d.phone||''],['Email','pEmail','email',d.email||''],['NTN/STRN','pNtn','text',d.ntn||''],['Opening Balance','pBal','number',d.balance||0]].map(([l,id,t,v])=>`<div class="fld"><label class="lbl">${l}</label><input type="${t}" class="inp" id="${id}" value="${esc(v)}"></div>`).join('')}<div class="fld"><label class="lbl">Address</label><textarea class="inp" id="pAddr">${esc(d.address||'')}</textarea></div><div style="display:flex;gap:8px;justify-content:flex-end;margin-top:8px;"><button class="btn bg" onclick="closeMod()">Cancel</button><button class="btn bp" onclick="saveParty()">💾 Save</button></div>`);}
+function saveParty(){if(!requireAdmin('save party'))return;if(!vReq('pName','ePName','Name required.'))return toast('⚠️ Name required!');const g=id=>document.getElementById(id)?.value||'';const p={id:g('pId'),name:cleanText(g('pName')),phone:cleanText(g('pPhone')),email:cleanText(g('pEmail')),ntn:cleanText(g('pNtn')),address:cleanText(g('pAddr')),balance:parseFloat(g('pBal'))||0,updatedAt:new Date().toISOString()};window.FSAVE(_pTab,p);addAudit('SAVE',_pTab,p.name,'');toast('✅ Saved!');closeMod();renderApp();}
+
+// ═══ PRODUCTS ═══
+function renderProducts(){const db=window.DB||STATE;const prods=db.products||[];return`<div class="page"><div class="ph"><div><div class="pt">📦 Products & Stock</div></div><button class="btn bp bl" onclick="openProdForm()">+ Add Product</button></div><div class="card" style="padding:0;overflow:hidden;">${prods.length===0?`<div class="empty"><div class="ei">📦</div><p>No products yet.</p></div>`:`<div class="tw"><table><thead><tr><th>NAME</th><th>UNIT</th><th>SALE RATE</th><th>PURCH RATE</th><th>STOCK</th><th>MIN</th><th>ACTIONS</th></tr></thead><tbody>${prods.map(p=>`<tr style="background:${(+p.stock||0)<=(+p.minStock||5)?'#FFF3F3':''}"><td style="font-weight:700;">${esc(p.name)}</td><td>${esc(p.unit||'')}</td><td>${fmt(p.saleRate)}</td><td>${fmt(p.purchaseRate)}</td><td style="font-weight:700;color:${(+p.stock||0)<=(+p.minStock||5)?'var(--red)':'var(--green)'};">${p.stock||0}</td><td>${p.minStock||5}</td><td style="display:flex;gap:5px;"><button class="btn bo bs" onclick='openProdForm(${JSON.stringify(p).replace(/'/g,"&#39;")})'>✏️</button><button class="btn bd bs" onclick="if(confirm('Delete?')){window.FDEL('products','${p.id}');renderApp();}">🗑️</button></td></tr>`).join('')}</tbody></table></div>`}</div></div>`;}
+function openProdForm(ex){const isN=!ex;const d=ex||{id:genId('PRD'),name:'',unit:'Pcs',saleRate:0,purchaseRate:0,stock:0,minStock:5,category:''};openMod(`<div class="mh"><div class="mt">${isN?'Add':'Edit'} Product</div><button class="btn bg bs" onclick="closeMod()">✕</button></div><input type="hidden" id="prId" value="${esc(d.id)}"><div class="fld"><label class="lbl">Name *</label><input class="inp" id="prName" value="${esc(d.name)}"><div class="err" id="ePr">Name required.</div></div><div class="g2">${[['Unit','prUnit','text',d.unit||'Pcs'],['Category','prCat','text',d.category||''],['Sale Rate','prSale','number',d.saleRate||0],['Purchase Rate','prPurch','number',d.purchaseRate||0],['Current Stock','prStock','number',d.stock||0],['Min Stock','prMin','number',d.minStock||5]].map(([l,id,t,v])=>`<div class="fld"><label class="lbl">${l}</label><input type="${t}" class="inp" id="${id}" value="${esc(v)}"></div>`).join('')}</div><div style="display:flex;gap:8px;justify-content:flex-end;margin-top:8px;"><button class="btn bg" onclick="closeMod()">Cancel</button><button class="btn bp" onclick="saveProd()">💾 Save</button></div>`);}
+function saveProd(){if(!requireAdmin('save product'))return;if(!vReq('prName','ePr','Name required.'))return toast('⚠️ Name required!');const g=id=>document.getElementById(id)?.value||'';const p={id:g('prId'),name:cleanText(g('prName')),unit:cleanText(g('prUnit')),category:cleanText(g('prCat')),saleRate:parseFloat(g('prSale'))||0,purchaseRate:parseFloat(g('prPurch'))||0,stock:parseFloat(g('prStock'))||0,minStock:parseFloat(g('prMin'))||5,updatedAt:new Date().toISOString()};window.FSAVE('products',p);addAudit('SAVE','products',p.name,'');toast('✅ Saved!');closeMod();renderApp();}
+
+// ═══ PAYMENTS ═══
+function renderPayments(){const db=window.DB||STATE;const pmts=db.payments||[];const tIn=pmts.filter(p=>p.type==='received').reduce((s,p)=>s+(+p.amount||0),0);const tOut=pmts.filter(p=>p.type==='paid').reduce((s,p)=>s+(+p.amount||0),0);return`<div class="page"><div class="ph"><div><div class="pt">💰 Payments</div></div><button class="btn bp bl" onclick="openPmtForm()">+ Record Payment</button></div><div class="g2" style="margin-bottom:14px;"><div class="stat" style="background:var(--green);"><div class="sn" style="font-size:18px;">${fmt(tIn)}</div><div class="sl">Total Received</div></div><div class="stat" style="background:var(--red);"><div class="sn" style="font-size:18px;">${fmt(tOut)}</div><div class="sl">Total Paid Out</div></div></div><div class="card" style="padding:0;overflow:hidden;">${pmts.length===0?`<div class="empty"><div class="ei">💳</div><p>No payments yet.</p></div>`:`<div class="tw"><table><thead><tr><th>DATE</th><th>TYPE</th><th>PARTY</th><th>INVOICE REF</th><th>METHOD</th><th>AMOUNT</th><th></th></tr></thead><tbody>${[...pmts].sort((a,b)=>new Date(b.date)-new Date(a.date)).map(p=>`<tr><td>${fmtD(p.date)}</td><td><span class="bdg bg-${p.type==='received'?'green':'red'}">${p.type==='received'?'Received':'Paid Out'}</span></td><td style="font-weight:700;">${esc(cleanText(p.partyName||''))}</td><td>${esc(p.invoiceRef||'—')}</td><td>${esc(p.method||'Cash')}</td><td style="font-weight:700;color:${p.type==='received'?'var(--green)':'var(--red)'};">${fmt(p.amount)}</td><td><button class="btn bd bs" onclick="if(confirm('Delete?')){window.FDEL('payments','${p.id}');renderApp();}">🗑️</button></td></tr>`).join('')}</tbody></table></div>`}</div></div>`;}
+function openPmtForm(){const db=window.DB||STATE;openMod(`<div class="mh"><div class="mt">Record Payment</div><button class="btn bg bs" onclick="closeMod()">✕</button></div><div class="fld"><label class="lbl">Type</label><select class="inp" id="pmtType"><option value="received">Payment Received (from Customer)</option><option value="paid">Payment Paid Out (to Supplier)</option></select></div><div class="g2"><div class="fld"><label class="lbl">Date</label><input type="date" class="inp" id="pmtDate" value="${today()}"></div><div class="fld"><label class="lbl">Amount (PKR) *</label><input type="number" class="inp" id="pmtAmt" value="0" min="0"><div class="err" id="ePmt">Enter valid amount.</div></div></div><div class="fld"><label class="lbl">Party Name</label><input list="pc-dl" class="inp" id="pmtParty" placeholder="Customer / Supplier">${dl('pc-dl',db.customers.map(c=>c.name))}</div><div class="g2"><div class="fld"><label class="lbl">Invoice Reference</label><input list="pi-dl" class="inp" id="pmtRef" placeholder="INV-XXXXXX">${dl('pi-dl',db.invoices.map(i=>i.number))}</div><div class="fld"><label class="lbl">Method</label><select class="inp" id="pmtMethod">${['Cash','Bank Transfer','Cheque','Online','Other'].map(m=>`<option>${m}</option>`).join('')}</select></div></div><div class="fld"><label class="lbl">Notes</label><input class="inp" id="pmtNotes"></div><div style="display:flex;gap:8px;justify-content:flex-end;margin-top:8px;"><button class="btn bg" onclick="closeMod()">Cancel</button><button class="btn bp" onclick="savePmt()">💾 Save Payment</button></div>`);}
+function savePmt(){const amt=parseFloat(document.getElementById('pmtAmt')?.value)||0;if(amt<=0){const e=document.getElementById('ePmt');if(e)e.classList.add('show');document.getElementById('pmtAmt')?.classList.add('invalid');return toast('⚠️ Enter valid amount!');}const g=id=>document.getElementById(id)?.value||'';const p={id:genId('PMT'),type:g('pmtType'),date:g('pmtDate'),amount:amt,partyName:cleanText(g('pmtParty')),invoiceRef:cleanText(g('pmtRef')),method:g('pmtMethod'),notes:cleanText(g('pmtNotes')),updatedAt:new Date().toISOString()};window.FSAVE('payments',p);toast('✅ Saved!');closeMod();renderApp();}
+
+// ═══ REPORTS ═══
+let _rp='month';
+function renderReports(){const db=window.DB||STATE;const inv=db.invoices||[],chal=db.challans||[],prods=db.products||[],custs=db.customers||[];const now=new Date();const filt=docs=>docs.filter(d=>{const dd=new Date(d.date+'T00:00:00');if(_rp==='week')return(now-dd)<=7*86400000;if(_rp==='month')return dd.getMonth()===now.getMonth()&&dd.getFullYear()===now.getFullYear();if(_rp==='year')return dd.getFullYear()===now.getFullYear();return true;});const fi=filt(inv);const ts=fi.reduce((s,i)=>s+(+i.total||0),0);const unp=inv.filter(i=>i.status==='Unpaid');const ut=unp.reduce((s,i)=>s+(+i.total||0),0);const ls=prods.filter(p=>(+p.stock||0)<=(+p.minStock||5));const rec=custs.map(c=>{const due=inv.filter(i=>i.customerName===c.name&&i.status!=='Paid').reduce((s,i)=>s+(+i.total||0),0);return{...c,due};}).filter(c=>c.due>0).sort((a,b)=>b.due-a.due);return`<div class="page"><div class="ph"><div><div class="pt">📊 Reports</div></div><div style="display:flex;gap:6px;flex-wrap:wrap;">${[['week','This Week'],['month','This Month'],['year','This Year'],['all','All Time']].map(([v,l])=>`<button class="btn bs ${_rp===v?'bp':'bo'}" onclick="_rp='${v}';renderApp();">${l}</button>`).join('')}</div></div><div class="g4" style="margin-bottom:14px;"><div class="stat" style="background:var(--navy);"><div class="sn" style="font-size:18px;">${fmt(ts)}</div><div class="sl">Total Sales</div></div><div class="stat" style="background:#2980B9;"><div class="sn">${fi.length}</div><div class="sl">Invoices Made</div></div><div class="stat" style="background:var(--red);"><div class="sn" style="font-size:18px;">${fmt(ut)}</div><div class="sl">Total Unpaid</div></div><div class="stat" style="background:var(--gold);"><div class="sn">${filt(chal).length}</div><div class="sl">Challans Sent</div></div></div><div class="g2"><div class="card"><div class="ct">💳 Receivables</div>${rec.length===0?`<div style="color:var(--green);font-size:13px;">✅ No outstanding!</div>`:`<div class="tw"><table><thead><tr><th>CUSTOMER</th><th>AMOUNT DUE</th></tr></thead><tbody>${rec.map(r=>`<tr><td style="font-weight:700;">${esc(r.name)}</td><td style="font-weight:700;color:var(--red);">${fmt(r.due)}</td></tr>`).join('')}</tbody></table></div>`}</div><div class="card"><div class="ct">📦 Low Stock</div>${ls.length===0?`<div style="color:var(--green);font-size:13px;">✅ All stock good!</div>`:`<div class="tw"><table><thead><tr><th>PRODUCT</th><th>STOCK</th><th>MIN</th></tr></thead><tbody>${ls.map(p=>`<tr><td style="font-weight:700;">${esc(p.name)}</td><td style="color:var(--red);font-weight:700;">${p.stock||0}</td><td>${p.minStock||5}</td></tr>`).join('')}</tbody></table></div>`}</div></div><div class="card"><div class="ct">🧾 Unpaid Invoices</div>${unp.length===0?`<div style="color:var(--green);font-size:13px;">✅ All paid!</div>`:`<div class="tw"><table><thead><tr><th>INVOICE NO</th><th>CUSTOMER</th><th>DATE</th><th>DUE DATE</th><th>AMOUNT</th></tr></thead><tbody>${unp.map(i=>`<tr><td style="font-weight:700;">${esc(i.number)}</td><td>${esc(cleanText(i.customerName||''))}</td><td>${fmtD(i.date)}</td><td style="color:${i.dueDate&&new Date(i.dueDate)<now?'var(--red)':'inherit'};">${fmtD(i.dueDate)}</td><td style="font-weight:700;color:var(--red);">${fmt(i.total)}</td></tr>`).join('')}</tbody></table></div>`}</div></div>`;}
+
+// ═══ AUDIT LOG PAGE ═══
+function renderAudit(){
+  const log=getAuditLog();
+  return`<div class="page">
+    <div class="ph">
+      <div><div class="pt">📋 Audit Log</div><div class="ps">${log.length} activities recorded</div></div>
+      <div style="display:flex;gap:6px;">
+        <button class="btn bo bs" onclick="exportBackup()">📥 Backup Data</button>
+        ${isAdmin()?`<button class="btn bd bs" onclick="if(confirm('Clear audit log?')){localStorage.removeItem('alico_audit');renderApp();}">🗑️ Clear Log</button>`:''}
+      </div>
+    </div>
+    <div class="card" style="padding:0;overflow:hidden;">
+    ${log.length===0?`<div class="empty"><div class="ei">📋</div><p>No activity recorded yet.</p></div>`:`
+    <div class="tw"><table>
+      <thead><tr><th>DATE & TIME</th><th>USER</th><th>ROLE</th><th>ACTION</th><th>DOCUMENT</th><th>DETAILS</th></tr></thead>
+      <tbody>${log.map(l=>`<tr>
+        <td style="font-size:11px;white-space:nowrap;">${fmtD(l.ts.slice(0,10))} ${l.ts.slice(11,16)}</td>
+        <td style="font-weight:700;">${esc(l.user)}</td>
+        <td><span class="bdg ${l.role==='admin'?'bg-green':'bg-blue'}">${esc(l.role)}</span></td>
+        <td><span class="bdg ${l.action==='DELETE'?'bg-red':l.action==='CREATE'?'bg-green':l.action==='EXPORT'?'bg-blue':'bg-yellow'}">${esc(l.action)}</span></td>
+        <td style="font-weight:700;color:var(--navy);">${esc(l.doc||'—')}</td>
+        <td style="font-size:11px;color:var(--muted);">${esc(l.extra||'—')}</td>
+      </tr>`).join('')}
+      </tbody>
+    </table></div>`}
+    </div>
+  </div>`;
+}
+
+
+// WHATSAPP SHARE — works on mobile + laptop (WhatsApp Web)
+function shareOnWhatsApp(doc2, type) {
+  const url = 'https://alico-enterprice.netlify.app';
+  const msg = '*' + type.toUpperCase() + '*\n' +
+    'No: ' + doc2.number + '\n' +
+    'Date: ' + doc2.date + '\n' +
+    'Customer: ' + (doc2.customerName || doc2.supplierName || '') + '\n' +
+    'Amount: PKR ' + Number(doc2.total||0).toLocaleString('en-PK',{minimumFractionDigits:2}) + '\n' +
+    'Status: ' + doc2.status + '\n\n' +
+    'ALICO Business Suite:\n' + url;
+
+  const encoded = encodeURIComponent(msg);
+  const waUrl = 'https://wa.me/?text=' + encoded;
+
+  // Try to open WhatsApp
+  const win = window.open(waUrl, '_blank');
+
+  // If blocked, show modal with copy option
+  if(!win || win.closed || typeof win.closed === 'undefined') {
+    openMod(`<div class="mh"><div class="mt">💬 Share via WhatsApp</div><button class="btn bg bs" onclick="closeMod()">✕</button></div>
+    <p style="font-size:13px;color:var(--muted);margin-bottom:14px;">Copy this message and paste in WhatsApp:</p>
+    <textarea class="inp" id="waMsg" style="min-height:160px;font-size:12px;">${msg.replace(/</g,'&lt;')}</textarea>
+    <div style="display:flex;gap:8px;justify-content:flex-end;margin-top:12px;">
+      <button class="btn bp" onclick="navigator.clipboard.writeText(document.getElementById('waMsg').value);toast('✅ Copied! Paste in WhatsApp.');">📋 Copy Message</button>
+      <a href="${waUrl}" target="_blank" class="btn bp" style="text-decoration:none;">🔗 Open WhatsApp Web</a>
+    </div>`);
+  } else {
+    toast('💬 Opening WhatsApp...');
+  }
+}
+
+// EXPENSE TRACKING
+function renderExpenses() {
+  const db = window.DB || STATE;
+  const expenses = db.expenses || [];
+  const total = expenses.reduce((s,e) => s + (+e.amount||0), 0);
+  const cats = [...new Set(expenses.map(e=>e.category))];
+  return `<div class="page">
+    <div class="ph">
+      <div><div class="pt">💸 Expenses</div><div class="ps">${expenses.length} records | Total: PKR ${Number(total).toLocaleString('en-PK',{minimumFractionDigits:2})}</div></div>
+      <button class="btn bp bl" onclick="openExpenseForm()">+ Add Expense</button>
+    </div>
+    <div class="card" style="padding:0;overflow:hidden;">
+    ${expenses.length===0?`<div class="empty"><div class="ei">💸</div><p>No expenses yet.</p></div>`:`
+    <div class="tw"><table><thead><tr><th>DATE</th><th>CATEGORY</th><th>DESCRIPTION</th><th>PAID TO</th><th>METHOD</th><th>AMOUNT</th><th></th></tr></thead>
+    <tbody>${[...expenses].sort((a,b)=>new Date(b.date)-new Date(a.date)).map(e=>`<tr>
+      <td>${fmtD(e.date)}</td>
+      <td><span class="bdg bg-yellow">${esc(e.category||'General')}</span></td>
+      <td style="font-weight:700;">${esc(e.description||'')}</td>
+      <td>${esc(e.paidTo||'')}</td>
+      <td>${esc(e.method||'Cash')}</td>
+      <td style="font-weight:700;color:var(--red);">PKR ${Number(e.amount||0).toLocaleString('en-PK',{minimumFractionDigits:2})}</td>
+      <td><button class="btn bd bs" onclick="if(confirm('Delete?')){window.FDEL('expenses','${e.id}');renderApp();}">🗑️</button></td>
+    </tr>`).join('')}
+    </tbody></table></div>`}
+    </div>
+  </div>`;
+}
+
+function openExpenseForm(ex) {
+  const isN = !ex;
+  const d = ex || {id:genId('EXP'),date:today(),category:'',description:'',paidTo:'',amount:0,method:'Cash',notes:''};
+  const cats = ['Rent','Utilities','Salaries','Transport','Office Supplies','Marketing','Maintenance','Purchases','Other'];
+  openMod(`<div class="mh"><div class="mt">${isN?'Add':'Edit'} Expense</div><button class="btn bg bs" onclick="closeMod()">✕</button></div>
+  <input type="hidden" id="expId" value="${esc(d.id)}">
+  <div class="g2">
+    <div class="fld"><label class="lbl">Date *</label><input type="date" class="inp" id="expDate" value="${esc(d.date)}"></div>
+    <div class="fld"><label class="lbl">Amount (PKR) *</label><input type="number" class="inp" id="expAmt" value="${d.amount||0}" min="0"><div class="err" id="eExpAmt">Enter amount.</div></div>
+    <div class="fld"><label class="lbl">Category</label><select class="inp" id="expCat">${cats.map(c=>`<option${d.category===c?' selected':''}>${c}</option>`).join('')}</select></div>
+    <div class="fld"><label class="lbl">Payment Method</label><select class="inp" id="expMethod">${['Cash','Bank Transfer','Cheque','Online'].map(m=>`<option${d.method===m?' selected':''}>${m}</option>`).join('')}</select></div>
+  </div>
+  <div class="fld"><label class="lbl">Description *</label><input class="inp" id="expDesc" value="${esc(d.description||'')}"><div class="err" id="eExpDesc">Required.</div></div>
+  <div class="fld"><label class="lbl">Paid To</label><input class="inp" id="expPaidTo" value="${esc(d.paidTo||'')}"></div>
+  <div class="fld"><label class="lbl">Notes</label><textarea class="inp" id="expNotes">${esc(d.notes||'')}</textarea></div>
+  <div style="display:flex;gap:8px;justify-content:flex-end;margin-top:8px;">
+    <button class="btn bg" onclick="closeMod()">Cancel</button>
+    <button class="btn bp" onclick="saveExpense()">💾 Save</button>
+  </div>`);
+}
+
+function saveExpense() {
+  if(!requireAdmin('save expense')) return;
+  const amt = parseFloat(document.getElementById('expAmt')?.value)||0;
+  const desc = document.getElementById('expDesc')?.value?.trim()||'';
+  if(amt<=0){document.getElementById('expAmt')?.classList.add('invalid');document.getElementById('eExpAmt')?.classList.add('show');return toast('⚠️ Enter amount!');}
+  if(!desc){document.getElementById('expDesc')?.classList.add('invalid');document.getElementById('eExpDesc')?.classList.add('show');return toast('⚠️ Enter description!');}
+  const g = id => document.getElementById(id)?.value||'';
+  const e = {id:g('expId'),date:g('expDate'),category:g('expCat'),description:cleanText(desc),paidTo:cleanText(g('expPaidTo')),amount:amt,method:g('expMethod'),notes:cleanText(g('expNotes')),updatedAt:new Date().toISOString()};
+  const db = window.DB||STATE;
+  if(!db.expenses) db.expenses=[];
+  window.FSAVE('expenses',e);
+  addAudit('SAVE','expenses',e.description,`PKR ${amt}`);
+  toast('✅ Expense saved!'); closeMod(); renderApp();
+}
+
+// CUSTOMER LEDGER
+function renderLedger() {
+  const db = window.DB || STATE;
+  const customers = db.customers || [];
+  return `<div class="page">
+    <div class="ph"><div><div class="pt">📒 Customer Ledger</div></div></div>
+    <div class="card" style="padding:0;overflow:hidden;">
+    ${customers.length===0?`<div class="empty"><div class="ei">📒</div><p>No customers yet.</p></div>`:`
+    <div class="tw"><table><thead><tr><th>CUSTOMER</th><th>TOTAL INVOICED</th><th>TOTAL PAID</th><th>BALANCE DUE</th><th></th></tr></thead>
+    <tbody>${customers.map(c=>{
+      const invs = (db.invoices||[]).filter(i=>i.customerName===c.name);
+      const totalInv = invs.reduce((s,i)=>s+(+i.total||0),0);
+      const totalPaid = (db.payments||[]).filter(p=>p.partyName===c.name&&p.type==='received').reduce((s,p)=>s+(+p.amount||0),0);
+      const balance = totalInv - totalPaid;
+      return `<tr>
+        <td style="font-weight:700;">${esc(c.name)}</td>
+        <td>PKR ${Number(totalInv).toLocaleString('en-PK',{minimumFractionDigits:2})}</td>
+        <td style="color:var(--green);font-weight:700;">PKR ${Number(totalPaid).toLocaleString('en-PK',{minimumFractionDigits:2})}</td>
+        <td style="color:${balance>0?'var(--red)':'var(--green)'};font-weight:700;">PKR ${Number(balance).toLocaleString('en-PK',{minimumFractionDigits:2})}</td>
+        <td><button class="btn bo bs" onclick="openLedgerDetail('${c.id}')">View →</button></td>
+      </tr>`;
+    }).join('')}
+    </tbody></table></div>`}
+    </div>
+  </div>`;
+}
+
+function openLedgerDetail(custId) {
+  const db = window.DB||STATE;
+  const c = db.customers.find(x=>x.id===custId);
+  if(!c) return;
+  const invs = (db.invoices||[]).filter(i=>i.customerName===c.name);
+  const pmts = (db.payments||[]).filter(p=>p.partyName===c.name&&p.type==='received');
+  const totalInv = invs.reduce((s,i)=>s+(+i.total||0),0);
+  const totalPaid = pmts.reduce((s,p)=>s+(+p.amount||0),0);
+  const balance = totalInv - totalPaid;
+  openMod(`<div class="mh"><div class="mt">📒 ${esc(c.name)} — Ledger</div><button class="btn bg bs" onclick="closeMod()">✕</button></div>
+  <div class="g2" style="margin-bottom:14px;">
+    <div class="stat" style="background:var(--navy);"><div class="sn" style="font-size:16px;">PKR ${Number(totalInv).toLocaleString('en-PK',{minimumFractionDigits:2})}</div><div class="sl">Total Invoiced</div></div>
+    <div class="stat" style="background:${balance>0?'var(--red)':'var(--green)'};"><div class="sn" style="font-size:16px;">PKR ${Number(balance).toLocaleString('en-PK',{minimumFractionDigits:2})}</div><div class="sl">Balance Due</div></div>
+  </div>
+  <div class="ct">📄 Invoices</div>
+  <div class="tw"><table><thead><tr><th>NO</th><th>DATE</th><th>AMOUNT</th><th>STATUS</th></tr></thead>
+  <tbody>${invs.map(i=>`<tr><td style="font-weight:700;">${esc(i.number)}</td><td>${fmtD(i.date)}</td><td>PKR ${Number(i.total||0).toLocaleString('en-PK',{minimumFractionDigits:2})}</td><td><span class="bdg bg-${bColor(i.status)}">${esc(i.status)}</span></td></tr>`).join('')||'<tr><td colspan="4" style="text-align:center;color:var(--muted);">No invoices</td></tr>'}
+  </tbody></table></div>
+  <div class="ct" style="margin-top:14px;">💰 Payments Received</div>
+  <div class="tw"><table><thead><tr><th>DATE</th><th>METHOD</th><th>AMOUNT</th></tr></thead>
+  <tbody>${pmts.map(p=>`<tr><td>${fmtD(p.date)}</td><td>${esc(p.method)}</td><td style="color:var(--green);font-weight:700;">PKR ${Number(p.amount||0).toLocaleString('en-PK',{minimumFractionDigits:2})}</td></tr>`).join('')||'<tr><td colspan="3" style="text-align:center;color:var(--muted);">No payments</td></tr>'}
+  </tbody></table></div>`);
+}
+
+// BANK ACCOUNTS
+function renderBankAccounts() {
+  const db = window.DB || STATE;
+  const accounts = db.bankaccounts || [];
+  const totalBal = accounts.reduce((s,a)=>s+(+a.balance||0),0);
+  return `<div class="page">
+    <div class="ph">
+      <div><div class="pt">🏦 Bank Accounts</div><div class="ps">Total Balance: PKR ${Number(totalBal).toLocaleString('en-PK',{minimumFractionDigits:2})}</div></div>
+      <button class="btn bp bl" onclick="openBankForm()">+ Add Account</button>
+    </div>
+    <div class="g4" style="margin-bottom:14px;">
+      ${accounts.map(a=>`<div class="stat" style="background:var(--navy);">
+        <div class="sn" style="font-size:16px;">PKR ${Number(a.balance||0).toLocaleString('en-PK',{minimumFractionDigits:2})}</div>
+        <div class="sl">${esc(a.name)}</div>
+      </div>`).join('')}
+    </div>
+    <div class="card" style="padding:0;overflow:hidden;">
+    ${accounts.length===0?`<div class="empty"><div class="ei">🏦</div><p>No bank accounts yet.</p></div>`:`
+    <div class="tw"><table><thead><tr><th>ACCOUNT NAME</th><th>BANK</th><th>ACCOUNT NO</th><th>BALANCE</th><th></th></tr></thead>
+    <tbody>${accounts.map(a=>`<tr>
+      <td style="font-weight:700;">${esc(a.name)}</td>
+      <td>${esc(a.bank||'')}</td>
+      <td>${esc(a.accountNo||'')}</td>
+      <td style="font-weight:700;color:${(+a.balance||0)>=0?'var(--green)':'var(--red)'};">PKR ${Number(a.balance||0).toLocaleString('en-PK',{minimumFractionDigits:2})}</td>
+      <td style="display:flex;gap:5px;">
+        <button class="btn bo bs" onclick='openBankForm(${JSON.stringify(a).replace(/'"'"'/g,"&#39;")})'>✏️</button>
+        <button class="btn bd bs" onclick="if(confirm('Delete?')){window.FDEL('bankaccounts','${a.id}');renderApp();}">🗑️</button>
+      </td>
+    </tr>`).join('')}
+    </tbody></table></div>`}
+    </div>
+  </div>`;
+}
+
+function openBankForm(ex) {
+  const d = ex||{id:genId('BNK'),name:'',bank:'',accountNo:'',balance:0,notes:''};
+  openMod(`<div class="mh"><div class="mt">${!ex?'Add':'Edit'} Bank Account</div><button class="btn bg bs" onclick="closeMod()">✕</button></div>
+  <input type="hidden" id="bnkId" value="${esc(d.id)}">
+  <div class="g2">
+    <div class="fld"><label class="lbl">Account Name *</label><input class="inp" id="bnkName" value="${esc(d.name||'')}"></div>
+    <div class="fld"><label class="lbl">Bank Name</label><input class="inp" id="bnkBank" value="${esc(d.bank||'')}"></div>
+    <div class="fld"><label class="lbl">Account Number</label><input class="inp" id="bnkNo" value="${esc(d.accountNo||'')}"></div>
+    <div class="fld"><label class="lbl">Current Balance</label><input type="number" class="inp" id="bnkBal" value="${d.balance||0}"></div>
+  </div>
+  <div class="fld"><label class="lbl">Notes</label><textarea class="inp" id="bnkNotes">${esc(d.notes||'')}</textarea></div>
+  <div style="display:flex;gap:8px;justify-content:flex-end;margin-top:8px;">
+    <button class="btn bg" onclick="closeMod()">Cancel</button>
+    <button class="btn bp" onclick="saveBankAccount()">💾 Save</button>
+  </div>`);
+}
+
+function saveBankAccount() {
+  if(!requireAdmin('save bank account')) return;
+  const g = id=>document.getElementById(id)?.value||'';
+  const name = g('bnkName').trim();
+  if(!name) return toast('⚠️ Account name required!');
+  const a = {id:g('bnkId'),name:cleanText(name),bank:cleanText(g('bnkBank')),accountNo:cleanText(g('bnkNo')),balance:parseFloat(g('bnkBal'))||0,notes:cleanText(g('bnkNotes')),updatedAt:new Date().toISOString()};
+  const db=window.DB||STATE; if(!db.bankaccounts)db.bankaccounts=[];
+  window.FSAVE('bankaccounts',a);
+  toast('✅ Saved!'); closeMod(); renderApp();
+}
+
+// ═══ MAIN RENDER ═══
+function renderApp(){
+  renderNav();
+  const app=document.getElementById('app');if(!app)return;
+  if(_view==='dashboard')      app.innerHTML=renderDash();
+  else if(_view==='quotations') app.innerHTML=docList('Quotation');
+  else if(_view==='challans')   app.innerHTML=docList('Challan');
+  else if(_view==='invoices')   app.innerHTML=docList('Invoice');
+  else if(_view==='purchases')  app.innerHTML=docList('Purchase');
+  else if(_view==='parties')    app.innerHTML=renderParties();
+  else if(_view==='products')   app.innerHTML=renderProducts();
+  else if(_view==='payments')   app.innerHTML=renderPayments();
+  else if(_view==='reports')    app.innerHTML=renderReports();
+  else if(_view==='salestax')   app.innerHTML=docList('SalesTaxInvoice');
+  else if(_view==='commercial') app.innerHTML=docList('CommercialBill');
+  else if(_view==='expenses')    app.innerHTML=renderExpenses();
+  else if(_view==='ledger')      app.innerHTML=renderLedger();
+  else if(_view==='bank')        app.innerHTML=renderBankAccounts();
+  else if(_view==='audit')       app.innerHTML=renderAudit();
+}
+</script>
+</body>
+</html>
