@@ -60,8 +60,6 @@ Developer
 Maria Aziz
 Independent AI/ML Researcher, Karachi, Pakistan
 Google AI Certified | Microsoft Azure
-ORCID: orcid.org/your-orcid
-UK Global Talent Visa (Digital Technology) Applicant
 ---
 License
 MIT License — open source for learning and reference.
